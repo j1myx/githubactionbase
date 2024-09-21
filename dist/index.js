@@ -31102,7 +31102,7 @@ try {
         throw new Error('Define param word');
     }
 
-    const json = JSON.stringify(github.context.payload.pull_request.head.ref)
+    const json = JSON.stringify(github.context.payload)
 
     core.setOutput('result', `Branch: ${json}`);
   } catch (error) {
