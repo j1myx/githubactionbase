@@ -9,7 +9,7 @@ try {
         throw new Error('Define param word');
     }
 
-    core.setOutput('result', `Branch: ${github.context.ref_name}`);
+    core.setOutput('result', `Branch is: ${github.context.ref_name}`);
   } catch (error) {
     core.setFailed(error.message);
   }
