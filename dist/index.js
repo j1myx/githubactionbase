@@ -31102,7 +31102,9 @@ try {
         throw new Error('Define param word');
     }
 
-    core.setOutput('result', `Branch: ${github.context.ref_name}`);
+    const json = JSON.stringify(github.context)
+
+    core.setOutput('result', `Context: ${json}`);
   } catch (error) {
     core.setFailed(error.message);
   }
