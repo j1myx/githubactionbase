@@ -31317,7 +31317,7 @@ try {
     let metricValue = null;
 
     switch (metricType) {
-        case 'm1': metricValue = (__nccwpck_require__(9836).m1); break;
+        case 'm1': (__nccwpck_require__(9836).then)(aa => metricValue = aa.m1); break;
         case 'm2': metricValue = (__nccwpck_require__(6154).m2); break;
         case 'm3': metricValue = (__nccwpck_require__(9276).m3); break;
         case 'm4': metricValue = (__nccwpck_require__(1582).m4); break;

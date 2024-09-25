@@ -5,7 +5,7 @@ try {
     let metricValue = null;
 
     switch (metricType) {
-        case 'm1': metricValue = require('./rules/m1').m1; break;
+        case 'm1': require('./rules/m1').then(aa => metricValue = aa.m1); break;
         case 'm2': metricValue = require('./rules/m2').m2; break;
         case 'm3': metricValue = require('./rules/m3').m3; break;
         case 'm4': metricValue = require('./rules/m4').m4; break;
