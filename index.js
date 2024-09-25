@@ -23,7 +23,7 @@ try {
         throw new Error('Undefined metric');
     }
 
-    core.setOutput('note', metricValue);
+    core.setOutput('value', metricValue);
   } catch (error) {
     core.setFailed(error.message);
   }
