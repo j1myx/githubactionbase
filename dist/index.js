@@ -29201,6 +29201,124 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 9836:
+/***/ ((module) => {
+
+/**
+ * Validar el formato del commit.
+ * 
+ * @param {string} commit 
+ * @returns 
+ */
+function validateCommitStandard(commit) {
+    const regex = /^(ci|docs|feat|fix|perf|refactor|test|style|chore|revert)\([a-z]{2,20}\):( [A-Z]{4}-[0-9]{1,30})? [ a-zA-Z0-9áéíóú]*$/
+
+    return commit.length <= 72 && regex.test(commit)
+}
+
+/**
+ * Validar la cantidad de commits.
+ * 
+ * @param {string[]} commits 
+ */
+function validateCommitQuantity(commits) {
+    const commitsQuantity = 5;
+
+    return commits.length >= commitsQuantity;
+}
+
+/**
+ * 
+ * @param {{ commitId: string, files: number }[]} commits 
+ */
+function validateCommitFilesQuantity(commits) {
+    commits[0]
+}
+
+/**
+ * Me falta:
+ * 
+ * M1:
+ * - Cantidad de commits: si
+ * - Cantidad de archivos por commit: si
+ * - Cantidad de lineas modificadas de archivo por commit: si (pull->commit->files)
+ * - Lineas modificadas en un PR: si
+ * 
+ * M2:
+ * - Cantidad de aprovadores: si
+ * - Cantidad de declinados: externo, no esta en el contexto del PR.
+ * 
+ * M3:
+ * - Lineas modificadas en un PR: si
+ * - Tiempo de cierre de un PR: si (cronjob created_at)
+ * M4:
+ * - Cantidad de comentarios y tareas abiertas en un PR: ?
+ * M5:
+ * - PR abiertos: externo, no esta en el contexto del PR. Sin embargo se puede hacer un cronjob indicando la demora.
+ */
+
+module.exports = {
+    m1: 5
+}
+
+/***/ }),
+
+/***/ 6154:
+/***/ ((module) => {
+
+module.exports = {
+    m2: 5
+}
+
+/***/ }),
+
+/***/ 9276:
+/***/ ((module) => {
+
+module.exports = {
+    m3: 5
+}
+
+/***/ }),
+
+/***/ 1582:
+/***/ ((module) => {
+
+module.exports = {
+    m4: 5
+}
+
+/***/ }),
+
+/***/ 3817:
+/***/ ((module) => {
+
+module.exports = {
+    m5: 5
+}
+
+/***/ }),
+
+/***/ 6502:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const core = __nccwpck_require__(4550);
+
+const m1 = core.getInput('m1') * 0.25;
+const m2 = core.getInput('m2') * 0.15;
+const m3 = core.getInput('m3') * 0.35;
+const m4 = core.getInput('m4') * 0.25;
+const m5 = core.getInput('m5') * -0.5; // Calibrar
+
+const total = m1 + m2 + m3 + m4 + m5;
+
+module.exports = {
+    total: total
+}
+
+
+/***/ }),
+
 /***/ 9491:
 /***/ ((module) => {
 
@@ -31095,16 +31213,28 @@ const core = __nccwpck_require__(4550);
 const github = __nccwpck_require__(1805);
 
 try {
-    const word = core.getInput('word');
-    console.log(word);
+    const metricType = core.getInput('metric');
+    let metricValue = null;
 
-    if (word === 'none') {
-        throw new Error('Define param word');
+    switch (metricType) {
+        case 'm1': metricValue = (__nccwpck_require__(9836).m1); break;
+        case 'm2': metricValue = (__nccwpck_require__(6154).m2); break;
+        case 'm3': metricValue = (__nccwpck_require__(9276).m3); break;
+        case 'm4': metricValue = (__nccwpck_require__(1582).m4); break;
+        case 'm5': metricValue = (__nccwpck_require__(3817).m5); break;
+        case 'total': metricValue = (__nccwpck_require__(6502).total); break;
     }
 
-    const json = JSON.stringify(github.context.payload)
+    if (metricValue === null) {
+        throw new Error('Undefined metric');
+    }
 
-    core.setOutput('result', `Branch: ${json}`);
+    core.setOutput('value', metricValue);
+
+    if (metricValue < 4) {
+        throw new Error('Nivel de madurez bajo: ' + metricValue);
+    }
+
   } catch (error) {
     core.setFailed(error.message);
   }

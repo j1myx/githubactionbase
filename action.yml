@@ -1,13 +1,21 @@
 name: 'Code review action'
 author: jimyx
 inputs:
-  word:
-    description: 'My param'
-    defult: 'none'
+  metric:
+    description: 'Metric type'
+  m1:
+    description: 'M1'
+  m2:
+    description: 'M2'
+  m3:
+    description: 'M3'
+  m4:
+    description: 'M4'
+  m5:
+    description: 'M5'
 output:
-  result:
-    description: 'My output param'
-    default: 'none'
+  value:
+    description: 'Record'
 runs:
   using: 'node20'
   main: 'dist/index.js'
