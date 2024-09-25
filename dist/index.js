@@ -29202,7 +29202,12 @@ function wrappy (fn, cb) {
 /***/ }),
 
 /***/ 9836:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const github = __nccwpck_require__(1805);
+const httpClient = __nccwpck_require__(8922);
+
+const commits = github.payload.pull_request.commits;
 
 /**
  * Validar el formato del commit.
@@ -29217,57 +29222,153 @@ function validateCommitStandard(commit) {
 }
 
 /**
+ * 
+ * @returns {Promise<object>}
+ */
+function calculateCommitPercentajes() {
+    const http = new httpClient.HttpClient()
+
+    return new Promise((resolve, reject) => {
+        http.get(github.payload.pull_request.commits_url).then(res => {
+            res.readBody().then(readBody => {
+                const body = JSON.parse(readBody)
+
+                let files = 0;
+                let changes = 0;
+
+                for (let i = 0; i < body.length; i++) {
+                    const commitUrl = body[i].url;
+
+                    http.get(commitUrl).then(resCommit => {
+                        files += resCommit.files;
+                        changes += resCommit.stats.total;
+                    });
+                }
+
+                const percentajeFiles = files / body.length;
+                const percentajeLines = changes / body.length;
+
+                setTimeout(() => {
+                    resolve({ files: percentajeFiles, changes: percentajeLines, totalChanges: changes })
+                }, 1000)
+            })
+        })
+    })
+}
+
+/**
  * Validar la cantidad de commits.
- * 
- * @param {string[]} commits 
  */
-function validateCommitQuantity(commits) {
-    const commitsQuantity = 5;
-
-    return commits.length >= commitsQuantity;
+function validateCommitQuantity(commitPercentajes) {
+    if (commits >= 8) {
+        return 1;
+    } else if (commits >= 6 && commits <= 7) {
+        return 2;
+    } else if (commits === 5) {
+        return 3;
+    } else if (commits >= 3 && commits <= 4) {
+        return 4;
+    } else if (commits >= 1 && commits <= 2) {
+        return 5;
+    }
 }
 
 /**
  * 
- * @param {{ commitId: string, files: number }[]} commits 
  */
-function validateCommitFilesQuantity(commits) {
-    commits[0]
+function validateCommitFilesQuantity(commitPercentajes) {
+    const percentajeFiles = commitPercentajes.files;
+
+    if (percentajeFiles >= 40) {
+        return 1;
+    } else if (percentajeFiles >=30 && percentajeFiles < 40) {
+        return 2;
+    } else if (percentajeFiles >= 20 && percentajeFiles < 30) {
+        return 3;
+    } else if (percentajeFiles >= 15 && percentajeFiles < 20) {
+        return 4;
+    } else if (percentajeFiles < 15) {
+        return 5;
+    }
 }
 
 /**
- * Me falta:
  * 
- * M1:
- * - Cantidad de commits: si
- * - Cantidad de archivos por commit: si
- * - Cantidad de lineas modificadas de archivo por commit: si (pull->commit->files)
- * - Lineas modificadas en un PR: si
- * 
- * M2:
- * - Cantidad de aprovadores: si
- * - Cantidad de declinados: externo, no esta en el contexto del PR.
- * 
- * M3:
- * - Lineas modificadas en un PR: si
- * - Tiempo de cierre de un PR: si (cronjob created_at)
- * M4:
- * - Cantidad de comentarios y tareas abiertas en un PR: ?
- * M5:
- * - PR abiertos: externo, no esta en el contexto del PR. Sin embargo se puede hacer un cronjob indicando la demora.
  */
+function validateCommitLinesQuantity(commitPercentajes) {
+    const percentajeLines = commitPercentajes.changes;
 
-module.exports = {
-    m1: 5
+    if (percentajeLines >= 350) {
+        return 1;
+    } else if (percentajeLines >=250 && percentajeLines < 350) {
+        return 2;
+    } else if (percentajeLines >= 150 && percentajeLines < 250) {
+        return 3;
+    } else if (percentajeLines >= 100 && percentajeLines < 150) {
+        return 4;
+    } else if (percentajeLines < 100) {
+        return 5;
+    }
 }
+
+/**
+ * 
+ */
+function validatePRLinesQuantity(commitPercentajes) {
+    const prLines = commitPercentajes.totalChanges;
+
+    if (prLines >= 350) {
+        return 1;
+    } else if (prLines >=250 && prLines < 350) {
+        return 2;
+    } else if (prLines >= 150 && prLines < 250) {
+        return 3;
+    } else if (prLines >= 100 && prLines < 150) {
+        return 4;
+    } else if (prLines < 100) {
+        return 5;
+    }
+}
+
+module.exports = new Promise((resolve, reject) => {
+    calculateCommitPercentajes().then(cp => {
+        const m1_1 = validateCommitQuantity(cp) * 0.2
+        const m1_2 = validateCommitFilesQuantity(cp) * 0.25
+        const m1_3 = validateCommitLinesQuantity(cp) * 0.25
+        const m1_4 = validatePRLinesQuantity(cp) * 0.3
+    
+        const total = m1_1 + m1_2 + m1_3 + m1_4
+
+        resolve({m1: total})
+    })
+})
 
 /***/ }),
 
 /***/ 6154:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const github = __nccwpck_require__(1805);
+
+const reviewers = github.payload.pull_request.requested_reviewers.length
+
+let reviewers_point = 0;
+
+if (reviewers === 1) {
+    reviewers_point = 3; 
+} else if (reviewers === 2) {
+    reviewers_point = 4;
+} else if (reviewers > 2) {
+    reviewers_point = 5;
+}
+
+let m2_1 = reviewers_point * 0.65;
+let m2_2 = 5 * 0.35; // calibrar
+
+const total = m2_1 + m2_2
 
 module.exports = {
-    m2: 5
+    m2: total
 }
 
 /***/ }),
@@ -29310,7 +29411,7 @@ const m3 = core.getInput('m3') * 0.35;
 const m4 = core.getInput('m4') * 0.25;
 const m5 = core.getInput('m5') * -0.5; // Calibrar
 
-const total = m1 + m2 + m3 + m4 + m5;
+const total = m1 + m2 + m3 + m4;
 
 module.exports = {
     total: total
@@ -31210,7 +31311,6 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(4550);
-const github = __nccwpck_require__(1805);
 
 try {
     const metricType = core.getInput('metric');
