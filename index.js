@@ -1,4 +1,5 @@
 const core = require('@actions/core');
+const github = require('@actions/github');
 
 try {
     const metricType = core.getInput('metric');
@@ -6,7 +7,7 @@ try {
 
     switch (metricType) {
         case 'm1': require('./rules/m1').then(aa => metricValue = aa.m1); break;
-        case 'm2': metricValue = require('./rules/m2').m2; break;
+        case 'm2': metricValue = require('./rules/m2')(github).m2; break;
         case 'm3': metricValue = require('./rules/m3').m3; break;
         case 'm4': metricValue = require('./rules/m4').m4; break;
         case 'm5': metricValue = require('./rules/m5').m5; break;

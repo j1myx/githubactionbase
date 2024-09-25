@@ -29346,29 +29346,29 @@ module.exports = new Promise((resolve, reject) => {
 /***/ }),
 
 /***/ 6154:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+/***/ ((module) => {
 
-const github = __nccwpck_require__(1805);
+module.exports = function(github) {
+    const reviewers = github.payload.pull_request.requested_reviewers.length
 
-const reviewers = github.payload.pull_request.requested_reviewers.length
+    let reviewers_point = 0;
+    
+    if (reviewers === 1) {
+        reviewers_point = 3; 
+    } else if (reviewers === 2) {
+        reviewers_point = 4;
+    } else if (reviewers > 2) {
+        reviewers_point = 5;
+    }
+    
+    let m2_1 = reviewers_point * 0.65;
+    let m2_2 = 5 * 0.35; // calibrar
+    
+    const total = m2_1 + m2_2
 
-let reviewers_point = 0;
-
-if (reviewers === 1) {
-    reviewers_point = 3; 
-} else if (reviewers === 2) {
-    reviewers_point = 4;
-} else if (reviewers > 2) {
-    reviewers_point = 5;
-}
-
-let m2_1 = reviewers_point * 0.65;
-let m2_2 = 5 * 0.35; // calibrar
-
-const total = m2_1 + m2_2
-
-module.exports = {
-    m2: total
+    return {
+        m2: total
+    }
 }
 
 /***/ }),
@@ -31311,6 +31311,7 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(4550);
+const github = __nccwpck_require__(1805);
 
 try {
     const metricType = core.getInput('metric');
@@ -31318,7 +31319,7 @@ try {
 
     switch (metricType) {
         case 'm1': (__nccwpck_require__(9836).then)(aa => metricValue = aa.m1); break;
-        case 'm2': metricValue = (__nccwpck_require__(6154).m2); break;
+        case 'm2': metricValue = __nccwpck_require__(6154)(github).m2; break;
         case 'm3': metricValue = (__nccwpck_require__(9276).m3); break;
         case 'm4': metricValue = (__nccwpck_require__(1582).m4); break;
         case 'm5': metricValue = (__nccwpck_require__(3817).m5); break;
