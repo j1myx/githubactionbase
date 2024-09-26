@@ -80,8 +80,12 @@ const m1 = () => {
     const commits = github.context.payload.pull_request.commits;
 
     return new Promise((resolve, reject) => {
+        console.log("commits_url", github.context.payload.pull_request.commits_url)
+
         http.get(github.context.payload.pull_request.commits_url).then(res => {
             res.readBody().then(readBody => {
+                console.log("response value", readBody)
+                console.log("response type", typeof readBody)
                 const body = JSON.parse(readBody)
 
                 let files = 0;
