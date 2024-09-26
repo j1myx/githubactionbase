@@ -29204,6 +29204,7 @@ function wrappy (fn, cb) {
 /***/ 9836:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+const github = __nccwpck_require__(1805);
 const httpClient = __nccwpck_require__(8922);
 
 const validateCommitStandard = (commit) => {
@@ -29280,13 +29281,12 @@ const validatePRLinesQuantity = (totalChanges) => {
     }
 }
 
-const m1 = (github) => {
+const m1 = () => {
     const http = new httpClient.HttpClient();
-    console.log(github)
-    const commits = github.payload.pull_request.commits;
+    const commits = github.context.payload.pull_request.commits;
 
     return new Promise((resolve, reject) => {
-        http.get(github.payload.pull_request.commits_url).then(res => {
+        http.get(github.context.payload.pull_request.commits_url).then(res => {
             res.readBody().then(readBody => {
                 const body = JSON.parse(readBody)
 
@@ -29323,11 +29323,12 @@ module.exports = { m1 }
 /***/ }),
 
 /***/ 6154:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const m2 = (github) => {
-    console.log(github)
-    const reviewers = github.payload.pull_request.requested_reviewers.length
+const github = __nccwpck_require__(1805);
+
+const m2 = () => {
+    const reviewers = github.context.payload.pull_request.requested_reviewers.length
 
     let reviewers_point = 0;
 
@@ -29352,7 +29353,7 @@ module.exports = { m2 }
 /***/ 9276:
 /***/ ((module) => {
 
-const m3 = (github) => {
+const m3 = () => {
     return 5;
 }
 
@@ -29363,7 +29364,7 @@ module.exports = { m3 }
 /***/ 1582:
 /***/ ((module) => {
 
-const m4 = (github) => {
+const m4 = () => {
     return 5;
 }
 
@@ -29374,7 +29375,7 @@ module.exports = { m4 }
 /***/ 3817:
 /***/ ((module) => {
 
-const m5 = (github) => {
+const m5 = () => {
     return 5;
 }
 
@@ -29383,9 +29384,11 @@ module.exports = { m5 }
 /***/ }),
 
 /***/ 6502:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const total = (core) => {
+const core = __nccwpck_require__(4550);
+
+const total = () => {
     const m1 = core.getInput('m1') * 0.25;
     const m2 = core.getInput('m2') * 0.15;
     const m3 = core.getInput('m3') * 0.35;
@@ -31291,7 +31294,6 @@ var __webpack_exports__ = {};
 // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
 (() => {
 const core = __nccwpck_require__(4550);
-const github = __nccwpck_require__(1805);
 
 const { m1 } = __nccwpck_require__(9836);
 const { m2 } = __nccwpck_require__(6154);
@@ -31305,12 +31307,12 @@ try {
     let metricValue = null;
 
     switch (metricType) {
-        case 'm1': m1(github).then(value => metricValue = value); break;
-        case 'm2': metricValue = m2(github); break;
-        case 'm3': metricValue = m3(github); break;
-        case 'm4': metricValue = m4(github); break;
-        case 'm5': metricValue = m5(github); break;
-        case 'total': metricValue = total(core); break;
+        case 'm1': m1().then(value => metricValue = value); break;
+        case 'm2': metricValue = m2(); break;
+        case 'm3': metricValue = m3(); break;
+        case 'm4': metricValue = m4(); break;
+        case 'm5': metricValue = m5(); break;
+        case 'total': metricValue = total(); break;
     }
 
     setTimeout(() => {

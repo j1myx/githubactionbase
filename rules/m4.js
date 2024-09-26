@@ -1,4 +1,4 @@
-const m4 = (github) => {
+const m4 = () => {
     return 5;
 }
 

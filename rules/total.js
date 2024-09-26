@@ -1,4 +1,6 @@
-const total = (core) => {
+const core = require('@actions/core');
+
+const total = () => {
     const m1 = core.getInput('m1') * 0.25;
     const m2 = core.getInput('m2') * 0.15;
     const m3 = core.getInput('m3') * 0.35;

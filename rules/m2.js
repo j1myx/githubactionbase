@@ -1,6 +1,7 @@
-const m2 = (github) => {
-    console.log(github)
-    const reviewers = github.payload.pull_request.requested_reviewers.length
+const github = require('@actions/github');
+
+const m2 = () => {
+    const reviewers = github.context.payload.pull_request.requested_reviewers.length
 
     let reviewers_point = 0;
 

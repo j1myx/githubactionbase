@@ -1,3 +1,4 @@
+const github = require('@actions/github');
 const httpClient = require('@actions/http-client');
 
 const validateCommitStandard = (commit) => {
@@ -74,13 +75,12 @@ const validatePRLinesQuantity = (totalChanges) => {
     }
 }
 
-const m1 = (github) => {
+const m1 = () => {
     const http = new httpClient.HttpClient();
-    console.log(github)
-    const commits = github.payload.pull_request.commits;
+    const commits = github.context.payload.pull_request.commits;
 
     return new Promise((resolve, reject) => {
-        http.get(github.payload.pull_request.commits_url).then(res => {
+        http.get(github.context.payload.pull_request.commits_url).then(res => {
             res.readBody().then(readBody => {
                 const body = JSON.parse(readBody)
 
