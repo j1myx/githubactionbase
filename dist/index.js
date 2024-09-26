@@ -29282,6 +29282,7 @@ const validatePRLinesQuantity = (totalChanges) => {
 
 const m1 = (github) => {
     const http = new httpClient.HttpClient();
+    console.log(github)
     const commits = github.payload.pull_request.commits;
 
     return new Promise((resolve, reject) => {
@@ -29325,6 +29326,7 @@ module.exports = { m1 }
 /***/ ((module) => {
 
 const m2 = (github) => {
+    console.log(github)
     const reviewers = github.payload.pull_request.requested_reviewers.length
 
     let reviewers_point = 0;

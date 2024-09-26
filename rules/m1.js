@@ -76,6 +76,7 @@ const validatePRLinesQuantity = (totalChanges) => {
 
 const m1 = (github) => {
     const http = new httpClient.HttpClient();
+    console.log(github)
     const commits = github.payload.pull_request.commits;
 
     return new Promise((resolve, reject) => {
