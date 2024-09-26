@@ -29283,6 +29283,11 @@ const validatePRLinesQuantity = (totalChanges) => {
 
 const m1 = () => {
     const http = new httpClient.HttpClient();
+    http.requestOptions = {
+        headers: {
+            ['User-agent']: 'j1myx'
+        }
+    }
     const commits = github.context.payload.pull_request.commits;
 
     return new Promise((resolve, reject) => {
