@@ -1,3 +1,5 @@
-module.exports = {
-    m3: 5
+const m3 = (github) => {
+    return 5;
 }
+
+module.exports = { m3 }
