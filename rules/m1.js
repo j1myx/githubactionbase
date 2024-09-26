@@ -89,8 +89,6 @@ const m1 = () => {
 
         http.get(github.context.payload.pull_request.commits_url).then(res => {
             res.readBody().then(readBody => {
-                console.log("response value", readBody)
-                console.log("response type", typeof readBody)
                 const body = JSON.parse(readBody)
 
                 let files = 0;
@@ -100,8 +98,9 @@ const m1 = () => {
                     const commitUrl = body[i].url;
 
                     http.get(commitUrl).then(resCommit => {
-                        files += resCommit.files;
-                        changes += resCommit.stats.total;
+                        const resCommitJson = JSON.parse(resCommit)
+                        files += resCommitJson.files;
+                        changes += resCommitJson.stats.total;
                     });
                 }
 
