@@ -98,11 +98,11 @@ const m1 = () => {
                     const commitUrl = body[i].url;
 
                     http.get(commitUrl).then(resCommit => {
-                        console.log('resCommit value', resCommit)
-                        console.log('resCommit type', typeof resCommit)
-                        const resCommitJson = JSON.parse(resCommit)
-                        files += resCommitJson.files.length;
-                        changes += resCommitJson.stats.total;
+                        resCommit.readBody().then(resCommitBody => {
+                            const resCommitJson = JSON.parse(resCommitBody)
+                            files += resCommitJson.files.length;
+                            changes += resCommitJson.stats.total;
+                        })
                     });
                 }
 
