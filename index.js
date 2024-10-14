@@ -13,7 +13,7 @@ try {
 
     switch (metricType) {
         case 'm1': m1().then(value => metricValue = value); break;
-        case 'm2': metricValue = m2(); break;
+        case 'm2': m2().then(value => metricValue = value); break;
         case 'm3': metricValue = m3(); break;
         case 'm4': metricValue = m4(); break;
         case 'm5': metricValue = m5(); break;
