@@ -29236,8 +29236,7 @@ function wrappy (fn, cb) {
 /***/ 5282:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const github = __nccwpck_require__(7318);
-const httpClient = __nccwpck_require__(4802);
+const { HttpHelper } = __nccwpck_require__(6807)
 
 const validateCommitStandard = (commit) => {
     const regex = /^(ci|docs|feat|fix|perf|refactor|test|style|chore|revert)\([a-z]{2,20}\):( [A-Z]{4}-[0-9]{1,30})? [ a-zA-Z0-9áéíóú]*$/
@@ -29248,7 +29247,7 @@ const validateCommitStandard = (commit) => {
 /**
  * Validar la cantidad de commits.
  */
-const validateCommitQuantity = (commits) => {
+const validateCommitsQuantity = (commits) => {
     if (commits >= 8) {
         return 1;
     } else if (commits >= 6 && commits <= 7) {
@@ -29263,7 +29262,7 @@ const validateCommitQuantity = (commits) => {
 }
 
 /**
- * 
+ * Validar la cantidad de archivos por commit
  */
 const validateCommitFilesQuantity = (files) => {
     if (files >= 40) {
@@ -29280,83 +29279,57 @@ const validateCommitFilesQuantity = (files) => {
 }
 
 /**
- * 
+ * Validar la cantidad de lineas modificadas
+ * 1. Es usado para validar la cantidad de lineas por archivo.
+ * 2. Es usado para validar la cantidad de lineas por pull request.
  */
-const validateCommitLinesQuantity = (changes) => {
-    if (changes >= 350) {
+const validateLinesQuantity = (lines) => {
+    if (lines >= 350) {
         return 1;
-    } else if (changes >=250 && changes < 350) {
+    } else if (lines >=250 && lines < 350) {
         return 2;
-    } else if (changes >= 150 && changes < 250) {
+    } else if (lines >= 150 && lines < 250) {
         return 3;
-    } else if (changes >= 100 && changes < 150) {
+    } else if (lines >= 100 && lines < 150) {
         return 4;
-    } else if (changes < 100) {
-        return 5;
-    }
-}
-
-/**
- * 
- */
-const validatePRLinesQuantity = (totalChanges) => {
-    if (totalChanges >= 350) {
-        return 1;
-    } else if (totalChanges >=250 && totalChanges < 350) {
-        return 2;
-    } else if (totalChanges >= 150 && totalChanges < 250) {
-        return 3;
-    } else if (totalChanges >= 100 && totalChanges < 150) {
-        return 4;
-    } else if (totalChanges < 100) {
+    } else if (lines < 100) {
         return 5;
     }
 }
 
 const m1 = () => {
-    const http = new httpClient.HttpClient();
-    http.requestOptions = {
-        headers: {
-            ['User-agent']: 'j1myx'
-        }
-    }
-    const commits = github.context.payload.pull_request.commits;
-
     return new Promise((resolve, reject) => {
-        console.log("commits_url", github.context.payload.pull_request.commits_url)
+        HttpHelper.getOnlinePullRequest()
+            .then(pullRequest => {
+                HttpHelper.get(pullRequest.commits_url).then(commits => {
+                    let commitFilesQuantity = 0
+                    let commitFileLinesQuantity = 0
 
-        http.get(github.context.payload.pull_request.commits_url).then(res => {
-            res.readBody().then(readBody => {
-                const body = JSON.parse(readBody)
+                    for (let i = 0; i < commits.length; i++) {
+                        const commitUrl = commits[i].url
 
-                let files = 0;
-                let changes = 0;
+                        HttpHelper.get(commitUrl).then(commit => {
+                            commitFilesQuantity += validateCommitFilesQuantity(commit.files.length)
 
-                for (let i = 0; i < body.length; i++) {
-                    const commitUrl = body[i].url;
+                            let fileLines = 0
+                            commit.files.forEach(file => {
+                                fileLines += validateLinesQuantity(file.changes)
+                            })
 
-                    http.get(commitUrl).then(resCommit => {
-                        resCommit.readBody().then(resCommitBody => {
-                            const resCommitJson = JSON.parse(resCommitBody)
-                            files += resCommitJson.files.length;
-                            changes += resCommitJson.stats.total;
+                            commitFileLinesQuantity += fileLines / commit.files.length
                         })
-                    });
-                }
+                    }
 
-                const percentajeFiles = files / body.length;
-                const percentajeLines = changes / body.length;
+                    setTimeout(() => {
+                        const m1_1 = validateCommitsQuantity(pullRequest.commits) * 0.2
+                        const m1_2 = (commitFilesQuantity / commits.length) * 0.25
+                        const m1_3 = (commitFileLinesQuantity / commits.length) * 0.25
+                        const m1_4 = validateLinesQuantity(pullRequest.additions + pullRequest.deletions) * 0.3
 
-                setTimeout(() => {
-                    const m1_1 = validateCommitQuantity(commits) * 0.2
-                    const m1_2 = validateCommitFilesQuantity(percentajeFiles) * 0.25
-                    const m1_3 = validateCommitLinesQuantity(percentajeLines) * 0.25
-                    const m1_4 = validatePRLinesQuantity(changes) * 0.3
-                
-                    resolve(m1_1 + m1_2 + m1_3 + m1_4)
-                }, 500)
+                        resolve(m1_1 + m1_2 + m1_3 + m1_4)
+                    }, 500)
+                })
             })
-        })
     })
 }
 
@@ -29367,26 +29340,26 @@ module.exports = { m1 }
 /***/ 2079:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const { HttpHelper } = __nccwpck_require__(6807);
+const { HttpHelper } = __nccwpck_require__(6807)
 
 // Not online:
 // const reviewers = github.context.payload.pull_request.requested_reviewers.length
 
 const m2 = () => {
     return HttpHelper.getOnlinePullRequest()
-        .then(pull_request => pull_request.requested_reviewers.length)
+        .then(pullRequest => pullRequest.requested_reviewers.length)
         .then(reviewers => {
-            let reviewers_point = 0;
+            let reviewersPoints = 0
 
             if (reviewers === 1) {
-                reviewers_point = 3;
+                reviewersPoints = 3
             } else if (reviewers === 2) {
-                reviewers_point = 4;
+                reviewersPoints = 4
             } else if (reviewers > 2) {
-                reviewers_point = 5;
+                reviewersPoints = 5
             }
 
-            const m2_1 = reviewers_point * 0.65;
+            const m2_1 = reviewersPoints * 0.65
             const m2_2 = 5 * 0.35; // calibrar
 
             return m2_1 + m2_2
