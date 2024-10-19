@@ -1,6 +1,98 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 5732:
+/***/ ((module) => {
+
+/**
+ * Validar estandar de commits
+ */
+const validateCommitStandard = (commit) => {
+    const regex = /^(ci|docs|feat|fix|perf|refactor|test|style|chore|revert)\([a-z]{2,20}\):( [A-Z]{4}-[0-9]{1,30})? [ a-zA-Z0-9áéíóú]*$/
+
+    return commit.length <= 72 && regex.test(commit)
+}
+
+/**
+ * Evaluar la cantidad de commits.
+ */
+const evaluateCommitsQuantity = (commits) => {
+    if (commits >= 8) {
+        return 1;
+    } else if (commits >= 6 && commits <= 7) {
+        return 2;
+    } else if (commits === 5) {
+        return 3;
+    } else if (commits >= 3 && commits <= 4) {
+        return 4;
+    } else if (commits >= 1 && commits <= 2) {
+        return 5;
+    }
+}
+
+/**
+ * Evaluar la cantidad de archivos por commit
+ */
+const evaluateCommitFilesQuantity = (files) => {
+    if (files >= 40) {
+        return 1;
+    } else if (files >=30 && files < 40) {
+        return 2;
+    } else if (files >= 20 && files < 30) {
+        return 3;
+    } else if (files >= 15 && files < 20) {
+        return 4;
+    } else if (files < 15) {
+        return 5;
+    }
+}
+
+/**
+ * Evaluar la cantidad de lineas modificadas
+ * 1. Es usado para validar la cantidad de lineas por archivo.
+ * 2. Es usado para validar la cantidad de lineas por pull request.
+ */
+const evaluateLinesQuantity = (lines) => {
+    if (lines >= 350) {
+        return 1;
+    } else if (lines >=250 && lines < 350) {
+        return 2;
+    } else if (lines >= 150 && lines < 250) {
+        return 3;
+    } else if (lines >= 100 && lines < 150) {
+        return 4;
+    } else if (lines < 100) {
+        return 5;
+    }
+}
+
+/**
+ * Evaluar la cantidad de aprovadores
+ */
+const evaluateReviewersQuantity = (reviewers) => {
+    let reviewersPoints = 0
+
+    if (reviewers === 1) {
+        reviewersPoints = 3
+    } else if (reviewers === 2) {
+        reviewersPoints = 4
+    } else if (reviewers > 2) {
+        reviewersPoints = 5
+    }
+
+    return reviewersPoints
+}
+
+module.exports = {
+    validateCommitStandard,
+    evaluateCommitsQuantity,
+    evaluateCommitFilesQuantity,
+    evaluateLinesQuantity,
+    evaluateReviewersQuantity
+}
+
+/***/ }),
+
 /***/ 6807:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
@@ -29237,65 +29329,7 @@ function wrappy (fn, cb) {
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const { HttpHelper } = __nccwpck_require__(6807)
-
-const validateCommitStandard = (commit) => {
-    const regex = /^(ci|docs|feat|fix|perf|refactor|test|style|chore|revert)\([a-z]{2,20}\):( [A-Z]{4}-[0-9]{1,30})? [ a-zA-Z0-9áéíóú]*$/
-
-    return commit.length <= 72 && regex.test(commit)
-}
-
-/**
- * Validar la cantidad de commits.
- */
-const validateCommitsQuantity = (commits) => {
-    if (commits >= 8) {
-        return 1;
-    } else if (commits >= 6 && commits <= 7) {
-        return 2;
-    } else if (commits === 5) {
-        return 3;
-    } else if (commits >= 3 && commits <= 4) {
-        return 4;
-    } else if (commits >= 1 && commits <= 2) {
-        return 5;
-    }
-}
-
-/**
- * Validar la cantidad de archivos por commit
- */
-const validateCommitFilesQuantity = (files) => {
-    if (files >= 40) {
-        return 1;
-    } else if (files >=30 && files < 40) {
-        return 2;
-    } else if (files >= 20 && files < 30) {
-        return 3;
-    } else if (files >= 15 && files < 20) {
-        return 4;
-    } else if (files < 15) {
-        return 5;
-    }
-}
-
-/**
- * Validar la cantidad de lineas modificadas
- * 1. Es usado para validar la cantidad de lineas por archivo.
- * 2. Es usado para validar la cantidad de lineas por pull request.
- */
-const validateLinesQuantity = (lines) => {
-    if (lines >= 350) {
-        return 1;
-    } else if (lines >=250 && lines < 350) {
-        return 2;
-    } else if (lines >= 150 && lines < 250) {
-        return 3;
-    } else if (lines >= 100 && lines < 150) {
-        return 4;
-    } else if (lines < 100) {
-        return 5;
-    }
-}
+const { evaluateCommitsQuantity, evaluateCommitFilesQuantity, evaluateLinesQuantity } = __nccwpck_require__(5732)
 
 const m1 = () => {
     return new Promise((resolve, reject) => {
@@ -29309,11 +29343,11 @@ const m1 = () => {
                         const commitUrl = commits[i].url
 
                         HttpHelper.get(commitUrl).then(commit => {
-                            commitFilesQuantity += validateCommitFilesQuantity(commit.files.length)
+                            commitFilesQuantity += evaluateCommitFilesQuantity(commit.files.length)
 
                             let fileLines = 0
                             commit.files.forEach(file => {
-                                fileLines += validateLinesQuantity(file.changes)
+                                fileLines += evaluateLinesQuantity(file.changes)
                             })
 
                             commitFileLinesQuantity += fileLines / commit.files.length
@@ -29321,10 +29355,10 @@ const m1 = () => {
                     }
 
                     setTimeout(() => {
-                        const m1_1 = validateCommitsQuantity(pullRequest.commits) * 0.2
+                        const m1_1 = evaluateCommitsQuantity(pullRequest.commits) * 0.2
                         const m1_2 = (commitFilesQuantity / commits.length) * 0.25
                         const m1_3 = (commitFileLinesQuantity / commits.length) * 0.25
-                        const m1_4 = validateLinesQuantity(pullRequest.additions + pullRequest.deletions) * 0.3
+                        const m1_4 = evaluateLinesQuantity(pullRequest.additions + pullRequest.deletions) * 0.3
 
                         resolve(m1_1 + m1_2 + m1_3 + m1_4)
                     }, 500)
@@ -29341,29 +29375,22 @@ module.exports = { m1 }
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const { HttpHelper } = __nccwpck_require__(6807)
+const { evaluateReviewersQuantity } = __nccwpck_require__(5732)
 
 // Not online:
 // const reviewers = github.context.payload.pull_request.requested_reviewers.length
 
 const m2 = () => {
-    return HttpHelper.getOnlinePullRequest()
-        .then(pullRequest => pullRequest.requested_reviewers.length)
-        .then(reviewers => {
-            let reviewersPoints = 0
+    return new Promise((resolve, reject) => {
+        HttpHelper.getOnlinePullRequest()
+            .then(pullRequest => pullRequest.requested_reviewers.length)
+            .then(reviewers => {
+                const m2_1 = evaluateReviewersQuantity(reviewers) * 0.65
+                const m2_2 = 5 * 0.35; // Static
 
-            if (reviewers === 1) {
-                reviewersPoints = 3
-            } else if (reviewers === 2) {
-                reviewersPoints = 4
-            } else if (reviewers > 2) {
-                reviewersPoints = 5
-            }
-
-            const m2_1 = reviewersPoints * 0.65
-            const m2_2 = 5 * 0.35; // calibrar
-
-            return m2_1 + m2_2
-        })
+                resolve(m2_1 + m2_2)
+            })
+    })
 }
 
 module.exports = { m2 }
@@ -29373,30 +29400,19 @@ module.exports = { m2 }
 /***/ 9992:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const github = __nccwpck_require__(7318);
-
-const pull_request = github.context.payload.pull_request;
-const modiffied = pull_request.additions + pull_request.deletions;
-
-const linesInPr = () => {
-    if (modiffied > 1200) {
-        return 1;
-    } else if (modiffied > 500 && modiffied <= 1200) {
-        return 2;
-    } else if (modiffied > 300 && modiffied <= 500) {
-        return 3;
-    } else if (modiffied > 50 && modiffied <= 300) {
-        return 4;
-    } else if (modiffied <=  50) {
-        return 5;
-    }
-}
+const { HttpHelper } = __nccwpck_require__(6807)
+const { evaluateLinesQuantity } = __nccwpck_require__(5732)
 
 const m3 = () => {
-    const m3_1 = 5 * 0.75; // cron job
-    const m3_2 = linesInPr() * 0.25;
-
-    return m3_1 + m3_2;
+    return new Promise((resolve, reject) => {
+        HttpHelper.getOnlinePullRequest()
+            .then(pullRequest => {
+                const m3_1 = 5 * 0.75; // TODO: cron job
+                const m3_2 = evaluateLinesQuantity(pullRequest.additions + pullRequest.deletions) * 0.25;
+            
+                resolve(m3_1 + m3_2)
+            })
+    })
 }
 
 module.exports = { m3 }
