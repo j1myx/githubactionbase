@@ -4,7 +4,7 @@ const httpClient = require('@actions/http-client')
 const http = new httpClient.HttpClient()
 http.requestOptions = {
     headers: {
-        ['User-agent']: github.context.payload.pull_request.user.login
+        ['User-agent']: 'COE Software Engineers - Code Review Action'
     }
 }
 
