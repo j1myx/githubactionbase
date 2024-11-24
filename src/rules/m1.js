@@ -13,11 +13,11 @@ const m1 = () => {
                         const commitUrl = commits[i].url
 
                         HttpHelper.get(commitUrl).then(commit => {
-                            commitFilesQuantity += evaluateCommitFilesQuantity(commit.files.length)
+                            commitFilesQuantity += evaluateCommitFilesQuantity(commit.commit.message, commit.files.length)
 
                             let fileLines = 0
                             commit.files.forEach(file => {
-                                fileLines += evaluateLinesQuantity(file.changes)
+                                fileLines += evaluateLinesQuantity(commit.commit.message, file.changes)
                             })
 
                             commitFileLinesQuantity += fileLines / commit.files.length

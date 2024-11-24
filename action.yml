@@ -3,6 +3,8 @@ author: jimyx
 inputs:
   metric:
     description: 'Metric type'
+  m0:
+    description: 'M0'
   m1:
     description: 'M1'
   m2:

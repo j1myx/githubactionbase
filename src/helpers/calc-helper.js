@@ -1,11 +1,4 @@
-/**
- * Validar estandar de commits
- */
-const validateCommitStandard = (commit) => {
-    const regex = /^(ci|docs|feat|fix|perf|refactor|test|style|chore|revert)\([a-z]{2,20}\):( [A-Z]{4}-[0-9]{1,30})? [ a-zA-Z0-9áéíóú]*$/
-
-    return commit.length <= 72 && regex.test(commit)
-}
+const { validateExonerateCommit } = require('./format-helper')
 
 /**
  * Evaluar la cantidad de commits.
@@ -27,7 +20,11 @@ const evaluateCommitsQuantity = (commits) => {
 /**
  * Evaluar la cantidad de archivos por commit
  */
-const evaluateCommitFilesQuantity = (files) => {
+const evaluateCommitFilesQuantity = (commitMessage, files) => {
+    if (validateExonerateCommit(commitMessage)) {
+        return 5;
+    }
+
     if (files >= 40) {
         return 1;
     } else if (files >=30 && files < 40) {
@@ -46,7 +43,11 @@ const evaluateCommitFilesQuantity = (files) => {
  * 1. Es usado para validar la cantidad de lineas por archivo.
  * 2. Es usado para validar la cantidad de lineas por pull request.
  */
-const evaluateLinesQuantity = (lines) => {
+const evaluateLinesQuantity = (commitMessage, lines) => {
+    if (validateExonerateCommit(commitMessage)) {
+        return 5;
+    }
+
     if (lines >= 350) {
         return 1;
     } else if (lines >=250 && lines < 350) {
@@ -78,7 +79,6 @@ const evaluateReviewersQuantity = (reviewers) => {
 }
 
 module.exports = {
-    validateCommitStandard,
     evaluateCommitsQuantity,
     evaluateCommitFilesQuantity,
     evaluateLinesQuantity,

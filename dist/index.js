@@ -1,130 +1,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 5732:
-/***/ ((module) => {
-
-/**
- * Validar estandar de commits
- */
-const validateCommitStandard = (commit) => {
-    const regex = /^(ci|docs|feat|fix|perf|refactor|test|style|chore|revert)\([a-z]{2,20}\):( [A-Z]{4}-[0-9]{1,30})? [ a-zA-Z0-9áéíóú]*$/
-
-    return commit.length <= 72 && regex.test(commit)
-}
-
-/**
- * Evaluar la cantidad de commits.
- */
-const evaluateCommitsQuantity = (commits) => {
-    if (commits >= 8) {
-        return 1;
-    } else if (commits >= 6 && commits <= 7) {
-        return 2;
-    } else if (commits === 5) {
-        return 3;
-    } else if (commits >= 3 && commits <= 4) {
-        return 4;
-    } else if (commits >= 1 && commits <= 2) {
-        return 5;
-    }
-}
-
-/**
- * Evaluar la cantidad de archivos por commit
- */
-const evaluateCommitFilesQuantity = (files) => {
-    if (files >= 40) {
-        return 1;
-    } else if (files >=30 && files < 40) {
-        return 2;
-    } else if (files >= 20 && files < 30) {
-        return 3;
-    } else if (files >= 15 && files < 20) {
-        return 4;
-    } else if (files < 15) {
-        return 5;
-    }
-}
-
-/**
- * Evaluar la cantidad de lineas modificadas
- * 1. Es usado para validar la cantidad de lineas por archivo.
- * 2. Es usado para validar la cantidad de lineas por pull request.
- */
-const evaluateLinesQuantity = (lines) => {
-    if (lines >= 350) {
-        return 1;
-    } else if (lines >=250 && lines < 350) {
-        return 2;
-    } else if (lines >= 150 && lines < 250) {
-        return 3;
-    } else if (lines >= 100 && lines < 150) {
-        return 4;
-    } else if (lines < 100) {
-        return 5;
-    }
-}
-
-/**
- * Evaluar la cantidad de aprovadores
- */
-const evaluateReviewersQuantity = (reviewers) => {
-    let reviewersPoints = 0
-
-    if (reviewers === 1) {
-        reviewersPoints = 3
-    } else if (reviewers === 2) {
-        reviewersPoints = 4
-    } else if (reviewers > 2) {
-        reviewersPoints = 5
-    }
-
-    return reviewersPoints
-}
-
-module.exports = {
-    validateCommitStandard,
-    evaluateCommitsQuantity,
-    evaluateCommitFilesQuantity,
-    evaluateLinesQuantity,
-    evaluateReviewersQuantity
-}
-
-/***/ }),
-
-/***/ 6807:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-const github = __nccwpck_require__(7318)
-const httpClient = __nccwpck_require__(4802)
-
-const http = new httpClient.HttpClient()
-http.requestOptions = {
-    headers: {
-        ['User-agent']: github.context.payload.pull_request.user.login
-    }
-}
-
-const HttpHelper = {
-    get: (path) => {
-        return http.get(path)
-            .then(response => response.readBody())
-            .catch(error => reject(error))
-            .then(body => JSON.parse(body))
-    },
-
-    getOnlinePullRequest: () => {
-        return HttpHelper.get(github.context.payload.pull_request.url)
-    }
-}
-
-module.exports = {
-    HttpHelper
-}
-
-/***/ }),
-
 /***/ 2208:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -29325,11 +29201,203 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 5282:
+/***/ 969:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const { HttpHelper } = __nccwpck_require__(6807)
-const { evaluateCommitsQuantity, evaluateCommitFilesQuantity, evaluateLinesQuantity } = __nccwpck_require__(5732)
+const { validateExonerateCommit } = __nccwpck_require__(6223)
+
+/**
+ * Evaluar la cantidad de commits.
+ */
+const evaluateCommitsQuantity = (commits) => {
+    if (commits >= 8) {
+        return 1;
+    } else if (commits >= 6 && commits <= 7) {
+        return 2;
+    } else if (commits === 5) {
+        return 3;
+    } else if (commits >= 3 && commits <= 4) {
+        return 4;
+    } else if (commits >= 1 && commits <= 2) {
+        return 5;
+    }
+}
+
+/**
+ * Evaluar la cantidad de archivos por commit
+ */
+const evaluateCommitFilesQuantity = (commitMessage, files) => {
+    if (validateExonerateCommit(commitMessage)) {
+        return 5;
+    }
+
+    if (files >= 40) {
+        return 1;
+    } else if (files >=30 && files < 40) {
+        return 2;
+    } else if (files >= 20 && files < 30) {
+        return 3;
+    } else if (files >= 15 && files < 20) {
+        return 4;
+    } else if (files < 15) {
+        return 5;
+    }
+}
+
+/**
+ * Evaluar la cantidad de lineas modificadas
+ * 1. Es usado para validar la cantidad de lineas por archivo.
+ * 2. Es usado para validar la cantidad de lineas por pull request.
+ */
+const evaluateLinesQuantity = (commitMessage, lines) => {
+    if (validateExonerateCommit(commitMessage)) {
+        return 5;
+    }
+
+    if (lines >= 350) {
+        return 1;
+    } else if (lines >=250 && lines < 350) {
+        return 2;
+    } else if (lines >= 150 && lines < 250) {
+        return 3;
+    } else if (lines >= 100 && lines < 150) {
+        return 4;
+    } else if (lines < 100) {
+        return 5;
+    }
+}
+
+/**
+ * Evaluar la cantidad de aprovadores
+ */
+const evaluateReviewersQuantity = (reviewers) => {
+    let reviewersPoints = 0
+
+    if (reviewers === 1) {
+        reviewersPoints = 3
+    } else if (reviewers === 2) {
+        reviewersPoints = 4
+    } else if (reviewers > 2) {
+        reviewersPoints = 5
+    }
+
+    return reviewersPoints
+}
+
+module.exports = {
+    evaluateCommitsQuantity,
+    evaluateCommitFilesQuantity,
+    evaluateLinesQuantity,
+    evaluateReviewersQuantity
+}
+
+/***/ }),
+
+/***/ 6223:
+/***/ ((module) => {
+
+/**
+ * Validar estandar de commits
+ */
+const validateCommitStandard = (commit) => {
+    const regex = /^(ci|docs|feat|fix|perf|refactor|test|style|chore|revert)(\([a-z]{2,20}\))?:( [A-Z]{4}-[0-9]{1,30}) [ a-zA-Z0-9áéíóú]*$/
+
+    return commit.length <= 72 && regex.test(commit)
+}
+
+const validateBranchStandard = (branch) => {
+    const regex = /^(feature|bugfix|hotfix|release)\/([A-Z]{4}-[0-9]{1,30})$/
+
+    return regex.test(branch)
+}
+
+/**
+ * 
+ * @param {string} commitMessage 
+ * @returns 
+ */
+const validateExonerateCommit = (commitMessage) => {
+    return commitMessage.startsWith('chore') || commitMessage.startsWith('style') || commitMessage.startsWith('docs')
+}
+
+module.exports = {
+    validateCommitStandard,
+    validateExonerateCommit,
+    validateBranchStandard
+}
+
+/***/ }),
+
+/***/ 8682:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const github = __nccwpck_require__(7318)
+const httpClient = __nccwpck_require__(4802)
+
+const http = new httpClient.HttpClient()
+http.requestOptions = {
+    headers: {
+        ['User-agent']: github.context.payload.pull_request.user.login
+    }
+}
+
+const HttpHelper = {
+    get: (path) => {
+        return http.get(path)
+            .then(response => response.readBody())
+            .catch(error => reject(error))
+            .then(body => JSON.parse(body))
+    },
+
+    getOnlinePullRequest: () => {
+        return HttpHelper.get(github.context.payload.pull_request.url)
+    }
+}
+
+module.exports = {
+    HttpHelper
+}
+
+/***/ }),
+
+/***/ 9146:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const { HttpHelper } = __nccwpck_require__(8682)
+const { validateBranchStandard, validateCommitStandard } = __nccwpck_require__(6223)
+
+const m0 = () => {
+    return new Promise((resolve, reject) => {
+        HttpHelper.getOnlinePullRequest()
+            .then(pullRequest => {
+                const m0_1 = validateBranchStandard(pullRequest.head.ref) ? 2 : 0
+                const m0_2 = 2
+
+                HttpHelper.get(pullRequest.commits_url).then(commits => {
+                    for (let i = 0; i < commits.length; i++) {
+                        const commit = commits[i]
+
+                        if (!validateCommitStandard(commit.commit.message)) {
+                            m0_2 = 0
+                            break
+                        }
+                    }
+
+                    resolve(m0_1 + m0_2)
+                })
+            })
+    })
+}
+
+module.exports = { m0 }
+
+/***/ }),
+
+/***/ 1673:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const { HttpHelper } = __nccwpck_require__(8682)
+const { evaluateCommitsQuantity, evaluateCommitFilesQuantity, evaluateLinesQuantity } = __nccwpck_require__(969)
 
 const m1 = () => {
     return new Promise((resolve, reject) => {
@@ -29343,11 +29411,11 @@ const m1 = () => {
                         const commitUrl = commits[i].url
 
                         HttpHelper.get(commitUrl).then(commit => {
-                            commitFilesQuantity += evaluateCommitFilesQuantity(commit.files.length)
+                            commitFilesQuantity += evaluateCommitFilesQuantity(commit.commit.message, commit.files.length)
 
                             let fileLines = 0
                             commit.files.forEach(file => {
-                                fileLines += evaluateLinesQuantity(file.changes)
+                                fileLines += evaluateLinesQuantity(commit.commit.message, file.changes)
                             })
 
                             commitFileLinesQuantity += fileLines / commit.files.length
@@ -29371,11 +29439,11 @@ module.exports = { m1 }
 
 /***/ }),
 
-/***/ 2079:
+/***/ 8720:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const { HttpHelper } = __nccwpck_require__(6807)
-const { evaluateReviewersQuantity } = __nccwpck_require__(5732)
+const { HttpHelper } = __nccwpck_require__(8682)
+const { evaluateReviewersQuantity } = __nccwpck_require__(969)
 
 // Not online:
 // const reviewers = github.context.payload.pull_request.requested_reviewers.length
@@ -29397,11 +29465,11 @@ module.exports = { m2 }
 
 /***/ }),
 
-/***/ 9992:
+/***/ 2871:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-const { HttpHelper } = __nccwpck_require__(6807)
-const { evaluateLinesQuantity } = __nccwpck_require__(5732)
+const { HttpHelper } = __nccwpck_require__(8682)
+const { evaluateLinesQuantity } = __nccwpck_require__(969)
 
 const m3 = () => {
     return new Promise((resolve, reject) => {
@@ -29419,7 +29487,7 @@ module.exports = { m3 }
 
 /***/ }),
 
-/***/ 6045:
+/***/ 3190:
 /***/ ((module) => {
 
 const m4 = () => {
@@ -29430,7 +29498,7 @@ module.exports = { m4 }
 
 /***/ }),
 
-/***/ 9774:
+/***/ 933:
 /***/ ((module) => {
 
 const m5 = () => {
@@ -29441,7 +29509,7 @@ module.exports = { m5 }
 
 /***/ }),
 
-/***/ 2192:
+/***/ 2721:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const core = __nccwpck_require__(5742);
@@ -31349,42 +31417,44 @@ module.exports = parseParams
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
-const core = __nccwpck_require__(5742);
+const core = __nccwpck_require__(5742)
 
-const { m1 } = __nccwpck_require__(5282);
-const { m2 } = __nccwpck_require__(2079);
-const { m3 } = __nccwpck_require__(9992);
-const { m4 } = __nccwpck_require__(6045);
-const { m5 } = __nccwpck_require__(9774);
-const { total } = __nccwpck_require__(2192);
+const { m0 } = __nccwpck_require__(9146)
+const { m1 } = __nccwpck_require__(1673)
+const { m2 } = __nccwpck_require__(8720)
+const { m3 } = __nccwpck_require__(2871)
+const { m4 } = __nccwpck_require__(3190)
+const { m5 } = __nccwpck_require__(933)
+const { total } = __nccwpck_require__(2721)
 
 try {
-    const metricType = core.getInput('metric');
-    let metricValue = null;
+    const metricType = core.getInput('metric')
+    let metricValue = null
 
     switch (metricType) {
-        case 'm1': m1().then(value => metricValue = value); break;
-        case 'm2': m2().then(value => metricValue = value); break;
-        case 'm3': metricValue = m3(); break;
-        case 'm4': metricValue = m4(); break;
-        case 'm5': metricValue = m5(); break;
-        case 'total': metricValue = total(); break;
+        case 'm0': m0().then(value => metricValue = value); break
+        case 'm1': m1().then(value => metricValue = value); break
+        case 'm2': m2().then(value => metricValue = value); break
+        case 'm3': metricValue = m3(); break
+        case 'm4': metricValue = m4(); break
+        case 'm5': metricValue = m5(); break
+        case 'total': metricValue = total(); break
     }
 
     setTimeout(() => {
         if (metricValue === null) {
-            throw new Error('Undefined metric');
+            throw new Error('Undefined metric')
         }
     
-        core.setOutput('value', metricValue);
+        core.setOutput('value', metricValue)
     
         if (metricValue < 4) {
-            throw new Error('Nivel de madurez bajo: ' + metricValue);
+            throw new Error('Nivel de madurez bajo: ' + metricValue)
         }
     }, 1500)
 
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error.message)
   }
 module.exports = __webpack_exports__;
 /******/ })()
