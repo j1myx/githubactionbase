@@ -31428,7 +31428,7 @@ const { m5 } = __nccwpck_require__(933)
 const { total } = __nccwpck_require__(2721)
 
 try {
-    console.log('Pull Request ID', core.getInput('pullRequestId'))
+    core.debug(core.getInput('pullRequestId'))
 
     const metricType = core.getInput('metric')
     let metricValue = null
