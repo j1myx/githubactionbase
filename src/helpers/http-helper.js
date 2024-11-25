@@ -26,7 +26,6 @@ const HttpHelper = {
             path = github.context.payload.pull_request.url
         }
 
-        console.log('path', path)
         return HttpHelper.get(path)
     }
 }

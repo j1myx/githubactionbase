@@ -29359,7 +29359,6 @@ const HttpHelper = {
             path = github.context.payload.pull_request.url
         }
 
-        console.log('path', path)
         return HttpHelper.get(path)
     }
 }
@@ -29381,7 +29380,7 @@ const m0 = () => {
         HttpHelper.getOnlinePullRequest()
             .then(pullRequest => {
                 const m0_1 = validateBranchStandard(pullRequest.head.ref) ? 2 : 0
-                const m0_2 = 2
+                let m0_2 = 2
 
                 HttpHelper.get(pullRequest.commits_url).then(commits => {
                     for (let i = 0; i < commits.length; i++) {
