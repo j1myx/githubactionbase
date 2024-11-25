@@ -1,4 +1,5 @@
 const github = require('@actions/github')
+const core = require('@actions/core')
 const httpClient = require('@actions/http-client')
 
 const http = new httpClient.HttpClient()
@@ -17,7 +18,16 @@ const HttpHelper = {
     },
 
     getOnlinePullRequest: () => {
-        return HttpHelper.get(github.context.payload.pull_request.url)
+        let path = ''
+
+        if (core.getInput('pullRequestId')) {
+            path = 'https://api.github.com/repos/' + github.context.payload.repository.full_name + '/pulls/' + core.getInput('pullRequestId')
+        } else {
+            path = github.context.payload.pull_request.url
+        }
+
+        console.log('path', path)
+        return HttpHelper.get(path)
     }
 }
 

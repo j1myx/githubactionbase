@@ -9,8 +9,6 @@ const { m5 } = require('./rules/m5')
 const { total } = require('./rules/total')
 
 try {
-    console.log(core.getInput('pullRequestId'))
-
     const metricType = core.getInput('metric')
     let metricValue = null
 

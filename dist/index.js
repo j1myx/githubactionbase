@@ -29332,6 +29332,7 @@ module.exports = {
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 const github = __nccwpck_require__(7318)
+const core = __nccwpck_require__(5742)
 const httpClient = __nccwpck_require__(4802)
 
 const http = new httpClient.HttpClient()
@@ -29350,7 +29351,16 @@ const HttpHelper = {
     },
 
     getOnlinePullRequest: () => {
-        return HttpHelper.get(github.context.payload.pull_request.url)
+        let path = ''
+
+        if (core.getInput('pullRequestId')) {
+            path = 'https://api.github.com/repos/' + github.context.payload.repository.full_name + '/pulls/' + core.getInput('pullRequestId')
+        } else {
+            path = github.context.payload.pull_request.url
+        }
+
+        console.log('path', path)
+        return HttpHelper.get(path)
     }
 }
 
@@ -31428,8 +31438,6 @@ const { m5 } = __nccwpck_require__(933)
 const { total } = __nccwpck_require__(2721)
 
 try {
-    throw new Error(core.getInput('pullRequestId') || 'none')
-
     const metricType = core.getInput('metric')
     let metricValue = null
 
