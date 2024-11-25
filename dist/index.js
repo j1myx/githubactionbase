@@ -29202,9 +29202,7 @@ function wrappy (fn, cb) {
 /***/ }),
 
 /***/ 969:
-/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
-
-const { validateExonerateCommit } = __nccwpck_require__(6223)
+/***/ ((module) => {
 
 /**
  * Evaluar la cantidad de commits.
@@ -29226,11 +29224,7 @@ const evaluateCommitsQuantity = (commits) => {
 /**
  * Evaluar la cantidad de archivos por commit
  */
-const evaluateCommitFilesQuantity = (commitMessage, files) => {
-    if (validateExonerateCommit(commitMessage)) {
-        return 5;
-    }
-
+const evaluateCommitFilesQuantity = (files) => {
     if (files >= 40) {
         return 1;
     } else if (files >=30 && files < 40) {
@@ -29249,11 +29243,7 @@ const evaluateCommitFilesQuantity = (commitMessage, files) => {
  * 1. Es usado para validar la cantidad de lineas por archivo.
  * 2. Es usado para validar la cantidad de lineas por pull request.
  */
-const evaluateLinesQuantity = (commitMessage, lines) => {
-    if (validateExonerateCommit(commitMessage)) {
-        return 5;
-    }
-
+const evaluateLinesQuantity = (lines) => {
     if (lines >= 350) {
         return 1;
     } else if (lines >=250 && lines < 350) {
@@ -29407,6 +29397,7 @@ module.exports = { m0 }
 
 const { HttpHelper } = __nccwpck_require__(8682)
 const { evaluateCommitsQuantity, evaluateCommitFilesQuantity, evaluateLinesQuantity } = __nccwpck_require__(969)
+const { validateExonerateCommit } = __nccwpck_require__(6223)
 
 const m1 = () => {
     return new Promise((resolve, reject) => {
@@ -29420,14 +29411,19 @@ const m1 = () => {
                         const commitUrl = commits[i].url
 
                         HttpHelper.get(commitUrl).then(commit => {
-                            commitFilesQuantity += evaluateCommitFilesQuantity(commit.commit.message, commit.files.length)
+                            if (validateExonerateCommit(commit.commit.message)) {
+                                commitFilesQuantity += 5
+                                commitFileLinesQuantity += 5
+                            } else {
+                                commitFilesQuantity += evaluateCommitFilesQuantity(commit.files.length)
 
-                            let fileLines = 0
-                            commit.files.forEach(file => {
-                                fileLines += evaluateLinesQuantity(commit.commit.message, file.changes)
-                            })
+                                let fileLines = 0
+                                commit.files.forEach(file => {
+                                    fileLines += evaluateLinesQuantity(file.changes)
+                                })
 
-                            commitFileLinesQuantity += fileLines / commit.files.length
+                                commitFileLinesQuantity += fileLines / commit.files.length
+                            }
                         })
                     }
 

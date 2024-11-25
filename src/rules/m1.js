@@ -1,5 +1,6 @@
 const { HttpHelper } = require('./../helpers/http-helper')
 const { evaluateCommitsQuantity, evaluateCommitFilesQuantity, evaluateLinesQuantity } = require('./../helpers/calc-helper')
+const { validateExonerateCommit } = require('./../helpers/format-helper')
 
 const m1 = () => {
     return new Promise((resolve, reject) => {
@@ -13,14 +14,19 @@ const m1 = () => {
                         const commitUrl = commits[i].url
 
                         HttpHelper.get(commitUrl).then(commit => {
-                            commitFilesQuantity += evaluateCommitFilesQuantity(commit.commit.message, commit.files.length)
+                            if (validateExonerateCommit(commit.commit.message)) {
+                                commitFilesQuantity += 5
+                                commitFileLinesQuantity += 5
+                            } else {
+                                commitFilesQuantity += evaluateCommitFilesQuantity(commit.files.length)
 
-                            let fileLines = 0
-                            commit.files.forEach(file => {
-                                fileLines += evaluateLinesQuantity(commit.commit.message, file.changes)
-                            })
+                                let fileLines = 0
+                                commit.files.forEach(file => {
+                                    fileLines += evaluateLinesQuantity(file.changes)
+                                })
 
-                            commitFileLinesQuantity += fileLines / commit.files.length
+                                commitFileLinesQuantity += fileLines / commit.files.length
+                            }
                         })
                     }
 

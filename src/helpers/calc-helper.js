@@ -1,5 +1,3 @@
-const { validateExonerateCommit } = require('./format-helper')
-
 /**
  * Evaluar la cantidad de commits.
  */
@@ -20,11 +18,7 @@ const evaluateCommitsQuantity = (commits) => {
 /**
  * Evaluar la cantidad de archivos por commit
  */
-const evaluateCommitFilesQuantity = (commitMessage, files) => {
-    if (validateExonerateCommit(commitMessage)) {
-        return 5;
-    }
-
+const evaluateCommitFilesQuantity = (files) => {
     if (files >= 40) {
         return 1;
     } else if (files >=30 && files < 40) {
@@ -43,11 +37,7 @@ const evaluateCommitFilesQuantity = (commitMessage, files) => {
  * 1. Es usado para validar la cantidad de lineas por archivo.
  * 2. Es usado para validar la cantidad de lineas por pull request.
  */
-const evaluateLinesQuantity = (commitMessage, lines) => {
-    if (validateExonerateCommit(commitMessage)) {
-        return 5;
-    }
-
+const evaluateLinesQuantity = (lines) => {
     if (lines >= 350) {
         return 1;
     } else if (lines >=250 && lines < 350) {
