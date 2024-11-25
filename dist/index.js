@@ -29337,7 +29337,7 @@ const httpClient = __nccwpck_require__(4802)
 const http = new httpClient.HttpClient()
 http.requestOptions = {
     headers: {
-        ['User-agent']: github.context.payload.pull_request.user.login
+        ['User-agent']: 'COE Software Engineers - Code Review Action'
     }
 }
 
