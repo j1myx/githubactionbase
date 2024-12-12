@@ -29645,7 +29645,7 @@ const m3 = () => {
 
                 let commitLinesQuantity = 0
 
-                files.forEarch(file => {
+                files.forEach(file => {
                     commitLinesQuantity += file.changes
                 })
 
