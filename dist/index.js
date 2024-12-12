@@ -29201,6 +29201,17 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 3565:
+/***/ ((module) => {
+
+module.exports = {
+    WORKFLOW_PRE_PULL_REQUEST: 'Code Review - Pre pull request',
+    WORKFLOW_PULL_REQUEST: 'Code Review - Pull request',
+    WORKFLOW_POST_PULL_REQUEST: 'Code Review - Post pull request'
+}
+
+/***/ }),
+
 /***/ 969:
 /***/ ((module) => {
 
@@ -29328,7 +29339,7 @@ const httpClient = __nccwpck_require__(4802)
 const http = new httpClient.HttpClient()
 http.requestOptions = {
     headers: {
-        ['User-agent']: 'COE Software Engineers - Code Review Action'
+        ['User-agent']: 'COE Software Engineer - Code Review Action'
     }
 }
 
@@ -29340,6 +29351,26 @@ const HttpHelper = {
             .then(body => JSON.parse(body))
     },
 
+    getEventPullRequest: () => {
+        return HttpHelper.get(github.context.payload.pull_request.url)
+    },
+
+    getPullRequestById: () => {
+        const pullRequestId = core.getInput('pull_request_id', { required: true })
+
+        return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
+            '/pulls/' + pullRequestId)
+    },
+    getCommitsByCompareBranch: () => {
+        return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
+            '/compare/' + core.getInput('destination_branch', { required: true }) + '...' + github.context.ref)
+            .then(response => response.commits)
+    },
+
+    /**
+     * @deprecated
+     * @returns 
+     */
     getOnlinePullRequest: () => {
         let path = ''
 
@@ -29362,18 +29393,29 @@ module.exports = {
 /***/ 9146:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+const github = __nccwpck_require__(7318)
+
 const { HttpHelper } = __nccwpck_require__(8682)
 const { validateBranchStandard, validateCommitStandard } = __nccwpck_require__(6223)
+const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = __nccwpck_require__(3565)
+
 
 const m0 = () => {
     return new Promise((resolve, reject) => {
-        HttpHelper.getOnlinePullRequest()
-            .then(pullRequest => {
+        if ([WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST].includes(github.context.workflow)) {
+            const httpPullRequest = WORKFLOW_PULL_REQUEST === github.context.workflow
+                ? HttpHelper.getEventPullRequest()
+                : HttpHelper.getPullRequestById()
+
+            httpPullRequest.then(pullRequest => {
+                console.info('Origin branch: ' + pullRequest.head.ref)
                 const m0_1 = validateBranchStandard(pullRequest.head.ref) ? 2 : 0
                 let m0_2 = 2
 
                 HttpHelper.get(pullRequest.commits_url).then(commits => {
                     for (let i = 0; i < commits.length; i++) {
+                        console.info('Commit N° ' + i + ': ' + commit.commit.message)
+
                         const commit = commits[i]
 
                         if (!validateCommitStandard(commit.commit.message)) {
@@ -29385,6 +29427,29 @@ const m0 = () => {
                     resolve(m0_1 + m0_2)
                 })
             })
+        } else {
+            /**
+             * Workflow: WORKFLOW_PRE_PULL_REQUEST
+             */
+            HttpHelper.getCommitsByCompareBranch().then(commits => {
+                console.info('Origin branch: ' + github.context.ref)
+                const m0_1 = validateBranchStandard(github.context.ref) ? 2 : 0
+                let m0_2 = 2
+
+                for (let i = 0; i < commits.length; i++) {
+                    console.info('Commit N° ' + i + ': ' + commit.commit.message)
+
+                    const commit = commits[i]
+
+                    if (!validateCommitStandard(commit.commit.message)) {
+                        m0_2 = 0
+                        break
+                    }
+                }
+
+                resolve(m0_1 + m0_2)
+            })
+        }
     })
 }
 
