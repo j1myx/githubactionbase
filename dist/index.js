@@ -29480,9 +29480,12 @@ module.exports = { m0 }
 /***/ 1673:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+const github = __nccwpck_require__(7318)
+
 const { HttpHelper } = __nccwpck_require__(8682)
 const { evaluateCommitsQuantity, evaluateCommitFilesQuantity, evaluateLinesQuantity } = __nccwpck_require__(969)
 const { validateExonerateCommit } = __nccwpck_require__(6223)
+const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = __nccwpck_require__(3565)
 
 const m1 = () => {
     return new Promise((resolve, reject) => {
@@ -29581,8 +29584,11 @@ module.exports = { m1 }
 /***/ 8720:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+const github = __nccwpck_require__(7318)
+
 const { HttpHelper } = __nccwpck_require__(8682)
 const { evaluateReviewersQuantity } = __nccwpck_require__(969)
+const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = __nccwpck_require__(3565)
 
 // Not online:
 // const reviewers = github.context.payload.pull_request.requested_reviewers.length
@@ -29611,8 +29617,11 @@ module.exports = { m2 }
 /***/ 2871:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
+const github = __nccwpck_require__(7318)
+
 const { HttpHelper } = __nccwpck_require__(8682)
 const { evaluateLinesQuantity } = __nccwpck_require__(969)
+const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = __nccwpck_require__(3565)
 
 const m3 = () => {
     return new Promise((resolve, reject) => {

@@ -1,5 +1,8 @@
+const github = require('@actions/github')
+
 const { HttpHelper } = require('./../helpers/http-helper')
 const { evaluateReviewersQuantity } = require('./../helpers/calc-helper')
+const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = require('./../constants/workflows.constant')
 
 // Not online:
 // const reviewers = github.context.payload.pull_request.requested_reviewers.length

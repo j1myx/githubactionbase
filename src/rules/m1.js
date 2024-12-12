@@ -1,6 +1,9 @@
+const github = require('@actions/github')
+
 const { HttpHelper } = require('./../helpers/http-helper')
 const { evaluateCommitsQuantity, evaluateCommitFilesQuantity, evaluateLinesQuantity } = require('./../helpers/calc-helper')
 const { validateExonerateCommit } = require('./../helpers/format-helper')
+const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = require('./../constants/workflows.constant')
 
 const m1 = () => {
     return new Promise((resolve, reject) => {
