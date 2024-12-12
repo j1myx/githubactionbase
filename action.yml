@@ -1,5 +1,5 @@
-name: 'Code review action'
-author: jimyx
+name: Code Review Action
+author: Jimy Navarro Cordova
 inputs:
   metric:
     description: 'Metric type'

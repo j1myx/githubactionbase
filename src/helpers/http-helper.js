@@ -5,7 +5,7 @@ const httpClient = require('@actions/http-client')
 const http = new httpClient.HttpClient()
 http.requestOptions = {
     headers: {
-        ['User-agent']: 'COE Software Engineers - Code Review Action'
+        ['User-agent']: 'COE Software Engineer - Code Review Action'
     }
 }
 
@@ -17,6 +17,26 @@ const HttpHelper = {
             .then(body => JSON.parse(body))
     },
 
+    getEventPullRequest: () => {
+        return HttpHelper.get(github.context.payload.pull_request.url)
+    },
+
+    getPullRequestById: () => {
+        const pullRequestId = core.getInput('pull_request_id', { required: true })
+
+        return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
+            '/pulls/' + pullRequestId)
+    },
+    getCommitsByCompareBranch: () => {
+        return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
+            '/compare/' + core.getInput('destination_branch', { required: true }) + '...' + github.context.ref)
+            .then(response => response.commits)
+    },
+
+    /**
+     * @deprecated
+     * @returns 
+     */
     getOnlinePullRequest: () => {
         let path = ''
 
