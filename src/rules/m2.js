@@ -6,7 +6,11 @@ const { evaluateReviewersQuantity } = require('./../helpers/calc-helper')
 
 const m2 = () => {
     return new Promise((resolve, reject) => {
-        HttpHelper.getOnlinePullRequest()
+        const httpPullRequest = WORKFLOW_PULL_REQUEST === github.context.workflow
+                ? HttpHelper.getEventPullRequest()
+                : HttpHelper.getPullRequestById()
+
+        httpPullRequest
             .then(pullRequest => pullRequest.requested_reviewers.length)
             .then(reviewers => {
                 const m2_1 = evaluateReviewersQuantity(reviewers) * 0.65

@@ -32,6 +32,11 @@ const HttpHelper = {
             '/compare/' + core.getInput('destination_branch', { required: true }) + '...' + github.context.ref)
             .then(response => response.commits)
     },
+    getFilesByCompareBranch: () => {
+        return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
+            '/compare/' + core.getInput('destination_branch', { required: true }) + '...' + github.context.ref)
+            .then(response => response.files)
+    },
 
     /**
      * @deprecated

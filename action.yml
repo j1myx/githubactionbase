@@ -15,8 +15,6 @@ inputs:
     description: 'M4'
   m5:
     description: 'M5'
-  pullRequestId:
-    description: 'Pull request ID'
 output:
   value:
     description: 'Record'
