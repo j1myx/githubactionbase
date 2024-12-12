@@ -29414,9 +29414,9 @@ const m0 = () => {
 
                 HttpHelper.get(pullRequest.commits_url).then(commits => {
                     for (let i = 0; i < commits.length; i++) {
-                        console.info('Commit N° ' + i + ': ' + commit.commit.message)
-
                         const commit = commits[i]
+
+                        console.info('Commit N° ' + i + ': ' + commit.commit.message)
 
                         if (!validateCommitStandard(commit.commit.message)) {
                             m0_2 = 0
@@ -29437,9 +29437,9 @@ const m0 = () => {
                 let m0_2 = 2
 
                 for (let i = 0; i < commits.length; i++) {
-                    console.info('Commit N° ' + i + ': ' + commit.commit.message)
-
                     const commit = commits[i]
+
+                    console.info('Commit N° ' + i + ': ' + commit.commit.message)
 
                     if (!validateCommitStandard(commit.commit.message)) {
                         m0_2 = 0
