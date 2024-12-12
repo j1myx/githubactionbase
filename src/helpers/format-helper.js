@@ -10,7 +10,7 @@ const validateCommitStandard = (commit) => {
 const validateBranchStandard = (branch) => {
     const regex = /^(feature|bugfix|hotfix|release)\/([A-Z]{4}-[0-9]{1,30})$/
 
-    return regex.test(branch)
+    return regex.test(saniticeBranch(branch))
 }
 
 /**
@@ -20,6 +20,21 @@ const validateBranchStandard = (branch) => {
  */
 const validateExonerateCommit = (commitMessage) => {
     return commitMessage.startsWith('chore') || commitMessage.startsWith('style') || commitMessage.startsWith('docs')
+}
+
+/**
+ * Remove prefix "refs/heads"
+ * 
+ * @param {string} branch 
+ */
+const saniticeBranch = (branch) => {
+    const REFS_HEADS = 'refs/heads/'
+
+    if (branch.startsWith(REFS_HEADS)) {
+        return branch.replace(REFS_HEADS, '')
+    }
+
+    return branch
 }
 
 module.exports = {
