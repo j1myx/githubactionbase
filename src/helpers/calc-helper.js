@@ -1,3 +1,5 @@
+const moment = require('moment')
+
 /**
  * Evaluar la cantidad de commits.
  */
@@ -68,9 +70,53 @@ const evaluateReviewersQuantity = (reviewers) => {
     return reviewersPoints
 }
 
+/**
+ * 
+ * @param {number} hours 
+ * @param {number} complexity 
+ * @returns 
+ */
+const evaluateTimeQuantity = (hours, complexity) => {
+    if (3 < complexity && complexity <= 5) {
+        if (hours > 32) {
+            return 1
+        } else if (20 < hours && hours <= 32) {
+            return 2
+        } else if (8 < hours && hours <= 20) {
+            return 3
+        } else if (4 < hours && hours <= 8) {
+            return 4
+        } else if (hours <= 4) {
+            return 5
+        }
+    } else if (0 <= complexity && complexity <= 3) {
+        if (hours > 32 || hours <= 0.5) {
+            return 1
+        } else if ((20 < hours && hours <= 32) || (0.5 < hours && hours <= 1)) {
+            return 2
+        } else if (8 < hours && hours <= 20) {
+            return 3
+        } else if (4 < hours && hours <= 8) {
+            return 4
+        } else if (hours <= 4) {
+            return 5
+        }
+    }
+
+    return 0
+}
+
+const getHoursDiff = (date) => {
+    const prCreated = moment(date, "YYYY-MM-DD'T'HH:mm:ss").subtract(5, 'hours')
+
+    return moment().diff(prCreated, 'hours', true).toFixed(1)
+}
+
 module.exports = {
     evaluateCommitsQuantity,
     evaluateCommitFilesQuantity,
     evaluateLinesQuantity,
-    evaluateReviewersQuantity
+    evaluateReviewersQuantity,
+    evaluateTimeQuantity,
+    getHoursDiff
 }

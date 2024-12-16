@@ -16,8 +16,8 @@ try {
         case 'm0': m0().then(value => metricValue = value); break
         case 'm1': m1().then(value => metricValue = value); break
         case 'm2': m2().then(value => metricValue = value); break
-        case 'm3': metricValue = m3(); break
-        case 'm4': metricValue = m4(); break
+        case 'm3': m3().then(value => metricValue = value); break
+        case 'm4': m4().then(value => metricValue = value); break
         case 'm5': metricValue = m5(); break
         case 'total': metricValue = total(); break
     }

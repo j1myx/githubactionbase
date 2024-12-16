@@ -1,7 +1,8 @@
 const github = require('@actions/github')
+const core = require('@actions/core')
 
 const { HttpHelper } = require('./../helpers/http-helper')
-const { evaluateLinesQuantity } = require('./../helpers/calc-helper')
+const { evaluateLinesQuantity, evaluateTimeQuantity, getHoursDiff } = require('./../helpers/calc-helper')
 const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = require('./../constants/workflows.constant')
 
 const m3 = () => {
@@ -12,9 +13,10 @@ const m3 = () => {
                 : HttpHelper.getPullRequestById()
             httpPullRequest
                 .then(pullRequest => {
-                    const m3_1 = 5 * 0.75; // TODO: cron job
+                    // TODO: definir el m1.
+                    const m3_1 = evaluateTimeQuantity(getHoursDiff(pullRequest.created_at), core.getInput('m1') || 5) * 0.75;
                     const m3_2 = evaluateLinesQuantity(pullRequest.additions + pullRequest.deletions) * 0.25;
-                
+
                     resolve(m3_1 + m3_2)
                 })
         } else {
@@ -31,7 +33,7 @@ const m3 = () => {
                 })
 
                 const m3_2 = evaluateLinesQuantity(commitLinesQuantity) * 0.25;
-            
+
                 resolve(m3_1 + m3_2)
             })
         }
