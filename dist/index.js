@@ -37361,6 +37361,8 @@ const { m4 } = __nccwpck_require__(3190)
 const { m5 } = __nccwpck_require__(933)
 const { total } = __nccwpck_require__(2721)
 
+console.log('process.env.GITHUB_TOKEN', process.env.GITHUB_TOKEN)
+
 try {
     const metricType = core.getInput('metric')
     let metricValue = null

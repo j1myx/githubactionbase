@@ -8,6 +8,8 @@ const { m4 } = require('./rules/m4')
 const { m5 } = require('./rules/m5')
 const { total } = require('./rules/total')
 
+console.log('process.env.GITHUB_TOKEN', process.env.GITHUB_TOKEN)
+
 try {
     const metricType = core.getInput('metric')
     let metricValue = null
