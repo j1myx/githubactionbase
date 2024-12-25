@@ -35096,7 +35096,7 @@ const http = new httpClient.HttpClient()
 http.requestOptions = {
     headers: {
         ['User-agent']: 'COE Software Engineer - Code Review Action',
-        ['Authorization']: `Bearer ${core.getInput('github_token')}`
+        ['Authorization']: `Bearer ${process.env.GITHUB_TOKEN}`
     }
 }
 
@@ -37352,7 +37352,6 @@ module.exports = parseParams
 /************************************************************************/
 var __webpack_exports__ = {};
 const core = __nccwpck_require__(5742)
-const github = __nccwpck_require__(7318)
 
 const { m0 } = __nccwpck_require__(9146)
 const { m1 } = __nccwpck_require__(1673)

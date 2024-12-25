@@ -3,8 +3,6 @@ author: Jimy Navarro Cordova
 inputs:
   metric:
     description: 'Metric type'
-  github_token:
-    description: GITHUB_TOKEN
   m0:
     description: 'M0'
   m1:

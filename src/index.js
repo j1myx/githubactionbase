@@ -1,5 +1,4 @@
 const core = require('@actions/core')
-const github = require('@actions/github')
 
 const { m0 } = require('./rules/m0')
 const { m1 } = require('./rules/m1')
