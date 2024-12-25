@@ -1,4 +1,5 @@
 const core = require('@actions/core')
+const github = require('@actions/github')
 
 const { m0 } = require('./rules/m0')
 const { m1 } = require('./rules/m1')
@@ -7,6 +8,10 @@ const { m3 } = require('./rules/m3')
 const { m4 } = require('./rules/m4')
 const { m5 } = require('./rules/m5')
 const { total } = require('./rules/total')
+
+console.log('github.context.payload.token', github.context.payload.token)
+console.log('github.context.token', github.context.token)
+console.log('github.token', github.token)
 
 try {
     const metricType = core.getInput('metric')

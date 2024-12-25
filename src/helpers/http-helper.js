@@ -5,7 +5,8 @@ const httpClient = require('@actions/http-client')
 const http = new httpClient.HttpClient()
 http.requestOptions = {
     headers: {
-        ['User-agent']: 'COE Software Engineer - Code Review Action'
+        ['User-agent']: 'COE Software Engineer - Code Review Action',
+        //['Authorization']: `Bearer ${github.context.payload.token}`
     }
 }
 
@@ -13,7 +14,6 @@ const HttpHelper = {
     get: (path) => {
         return http.get(path)
             .then(response => response.readBody())
-            .catch(error => reject(error))
             .then(body => JSON.parse(body))
     },
 
