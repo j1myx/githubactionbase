@@ -35096,7 +35096,7 @@ const http = new httpClient.HttpClient()
 http.requestOptions = {
     headers: {
         ['User-agent']: 'COE Software Engineer - Code Review Action',
-        //['Authorization']: `Bearer ${github.context.payload.token}`
+        ['Authorization']: `Bearer ${core.getInput('github_token')}`
     }
 }
 
@@ -37361,10 +37361,6 @@ const { m3 } = __nccwpck_require__(2871)
 const { m4 } = __nccwpck_require__(3190)
 const { m5 } = __nccwpck_require__(933)
 const { total } = __nccwpck_require__(2721)
-
-console.log('github.context.payload.token', github.context.payload.token)
-console.log('github.context.token', github.context.token)
-console.log('github.token', github.token)
 
 try {
     const metricType = core.getInput('metric')

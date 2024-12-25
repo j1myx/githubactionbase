@@ -6,7 +6,7 @@ const http = new httpClient.HttpClient()
 http.requestOptions = {
     headers: {
         ['User-agent']: 'COE Software Engineer - Code Review Action',
-        //['Authorization']: `Bearer ${github.context.payload.token}`
+        ['Authorization']: `Bearer ${core.getInput('github_token')}`
     }
 }
 
