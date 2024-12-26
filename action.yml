@@ -3,6 +3,10 @@ author: Jimy Navarro Cordova
 inputs:
   metric:
     description: 'Metric type'
+    required: true
+  github_token:
+    description: 'secrets.GITHUB_TOKEN'
+    required: true
   m0:
     description: 'M0'
   m1:

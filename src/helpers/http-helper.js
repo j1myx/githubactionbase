@@ -6,7 +6,7 @@ const http = new httpClient.HttpClient()
 http.requestOptions = {
     headers: {
         ['User-agent']: 'COE Software Engineer - Code Review Action',
-        ['Authorization']: `Bearer ${process.env.GITHUB_TOKEN}`
+        ['Authorization']: `Bearer ${core.getInput('github_token')}`
     }
 }
 
@@ -16,16 +16,8 @@ const HttpHelper = {
             .then(response => response.readBody())
             .then(body => JSON.parse(body))
     },
-
     getEventPullRequest: () => {
         return HttpHelper.get(github.context.payload.pull_request.url)
-    },
-
-    getPullRequestById: () => {
-        const pullRequestId = core.getInput('pull_request_id', { required: true })
-
-        return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
-            '/pulls/' + pullRequestId)
     },
     getCommitsByCompareBranch: () => {
         return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
@@ -36,22 +28,6 @@ const HttpHelper = {
         return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
             '/compare/' + core.getInput('destination_branch', { required: true }) + '...' + github.context.ref)
             .then(response => response.files)
-    },
-
-    /**
-     * @deprecated
-     * @returns 
-     */
-    getOnlinePullRequest: () => {
-        let path = ''
-
-        if (core.getInput('pullRequestId')) {
-            path = 'https://api.github.com/repos/' + github.context.payload.repository.full_name + '/pulls/' + core.getInput('pullRequestId')
-        } else {
-            path = github.context.payload.pull_request.url
-        }
-
-        return HttpHelper.get(path)
     }
 }
 

@@ -112,11 +112,18 @@ const getHoursDiff = (date) => {
     return moment().diff(prCreated, 'hours', true).toFixed(1)
 }
 
+const getDaysDiff = (date) => {
+    const prCreated = moment(date, "YYYY-MM-DD'T'HH:mm:ss").subtract(5, 'hours')
+
+    return moment().diff(prCreated, 'days', true).toFixed(1)
+}
+
 module.exports = {
     evaluateCommitsQuantity,
     evaluateCommitFilesQuantity,
     evaluateLinesQuantity,
     evaluateReviewersQuantity,
     evaluateTimeQuantity,
-    getHoursDiff
+    getHoursDiff,
+    getDaysDiff
 }

@@ -34902,7 +34902,7 @@ function wrappy (fn, cb) {
 module.exports = {
     WORKFLOW_PRE_PULL_REQUEST: 'Code Review - Pre pull request',
     WORKFLOW_PULL_REQUEST: 'Code Review - Pull request',
-    WORKFLOW_POST_PULL_REQUEST: 'Code Review - Post pull request'
+    WORKFLOW_CRON_JOB: 'Code Review - Cron Job'
 }
 
 /***/ }),
@@ -35024,13 +35024,20 @@ const getHoursDiff = (date) => {
     return moment().diff(prCreated, 'hours', true).toFixed(1)
 }
 
+const getDaysDiff = (date) => {
+    const prCreated = moment(date, "YYYY-MM-DD'T'HH:mm:ss").subtract(5, 'hours')
+
+    return moment().diff(prCreated, 'days', true).toFixed(1)
+}
+
 module.exports = {
     evaluateCommitsQuantity,
     evaluateCommitFilesQuantity,
     evaluateLinesQuantity,
     evaluateReviewersQuantity,
     evaluateTimeQuantity,
-    getHoursDiff
+    getHoursDiff,
+    getDaysDiff
 }
 
 /***/ }),
@@ -35096,7 +35103,7 @@ const http = new httpClient.HttpClient()
 http.requestOptions = {
     headers: {
         ['User-agent']: 'COE Software Engineer - Code Review Action',
-        ['Authorization']: `Bearer ${process.env.GITHUB_TOKEN}`
+        ['Authorization']: `Bearer ${core.getInput('github_token')}`
     }
 }
 
@@ -35106,16 +35113,8 @@ const HttpHelper = {
             .then(response => response.readBody())
             .then(body => JSON.parse(body))
     },
-
     getEventPullRequest: () => {
         return HttpHelper.get(github.context.payload.pull_request.url)
-    },
-
-    getPullRequestById: () => {
-        const pullRequestId = core.getInput('pull_request_id', { required: true })
-
-        return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
-            '/pulls/' + pullRequestId)
     },
     getCommitsByCompareBranch: () => {
         return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
@@ -35126,22 +35125,6 @@ const HttpHelper = {
         return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
             '/compare/' + core.getInput('destination_branch', { required: true }) + '...' + github.context.ref)
             .then(response => response.files)
-    },
-
-    /**
-     * @deprecated
-     * @returns 
-     */
-    getOnlinePullRequest: () => {
-        let path = ''
-
-        if (core.getInput('pullRequestId')) {
-            path = 'https://api.github.com/repos/' + github.context.payload.repository.full_name + '/pulls/' + core.getInput('pullRequestId')
-        } else {
-            path = github.context.payload.pull_request.url
-        }
-
-        return HttpHelper.get(path)
     }
 }
 
@@ -35158,17 +35141,13 @@ const github = __nccwpck_require__(7318)
 
 const { HttpHelper } = __nccwpck_require__(8682)
 const { validateBranchStandard, validateCommitStandard } = __nccwpck_require__(6223)
-const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = __nccwpck_require__(3565)
+const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST } = __nccwpck_require__(3565)
 
 
 const m0 = () => {
     return new Promise((resolve, reject) => {
-        if ([WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST].includes(github.context.workflow)) {
-            const httpPullRequest = WORKFLOW_PULL_REQUEST === github.context.workflow
-                ? HttpHelper.getEventPullRequest()
-                : HttpHelper.getPullRequestById()
-
-            httpPullRequest.then(pullRequest => {
+        if (WORKFLOW_PULL_REQUEST === github.context.workflow) {
+            HttpHelper.getEventPullRequest().then(pullRequest => {
                 console.info('Origin branch: ' + pullRequest.head.ref)
                 const m0_1 = validateBranchStandard(pullRequest.head.ref) ? 2 : 0
                 let m0_2 = 2
@@ -35188,10 +35167,7 @@ const m0 = () => {
                     resolve(m0_1 + m0_2)
                 })
             })
-        } else {
-            /**
-             * Workflow: WORKFLOW_PRE_PULL_REQUEST
-             */
+        } else if (WORKFLOW_PRE_PULL_REQUEST === github.context.workflow) {
             HttpHelper.getCommitsByCompareBranch().then(commits => {
                 console.info('Origin branch: ' + github.context.ref)
                 const m0_1 = validateBranchStandard(github.context.ref) ? 2 : 0
@@ -35210,6 +35186,8 @@ const m0 = () => {
 
                 resolve(m0_1 + m0_2)
             })
+        } else {
+            reject(new Error('Invalid workflow called'))
         }
     })
 }
@@ -35226,16 +35204,12 @@ const github = __nccwpck_require__(7318)
 const { HttpHelper } = __nccwpck_require__(8682)
 const { evaluateCommitsQuantity, evaluateCommitFilesQuantity, evaluateLinesQuantity } = __nccwpck_require__(969)
 const { validateExonerateCommit } = __nccwpck_require__(6223)
-const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = __nccwpck_require__(3565)
+const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST } = __nccwpck_require__(3565)
 
 const m1 = () => {
     return new Promise((resolve, reject) => {
-        if ([WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST].includes(github.context.workflow)) {
-            const httpPullRequest = WORKFLOW_PULL_REQUEST === github.context.workflow
-                ? HttpHelper.getEventPullRequest()
-                : HttpHelper.getPullRequestById()
-
-            httpPullRequest.then(pullRequest => {
+        if (WORKFLOW_PULL_REQUEST === github.context.workflow) {
+            HttpHelper.getEventPullRequest().then(pullRequest => {
                 HttpHelper.get(pullRequest.commits_url).then(commits => {
                     let commitFilesQuantity = 0
                     let commitFileLinesQuantity = 0
@@ -35274,10 +35248,7 @@ const m1 = () => {
                 })
             })
 
-        } else {
-            /**
-             * Workflow: WORKFLOW_PRE_PULL_REQUEST
-             */
+        } else if (WORKFLOW_PRE_PULL_REQUEST === github.context.workflow) {
             HttpHelper.getCommitsByCompareBranch().then(commits => {
                 let commitFilesQuantity = 0
                 let commitFileLinesQuantity = 0
@@ -35314,6 +35285,8 @@ const m1 = () => {
                     resolve(m1_1 + m1_2 + m1_3 + m1_4)
                 }, 500)
             })
+        } else {
+            reject(new Error('Invalid workflow called'))
         }
     })
 }
@@ -35329,25 +35302,25 @@ const github = __nccwpck_require__(7318)
 
 const { HttpHelper } = __nccwpck_require__(8682)
 const { evaluateReviewersQuantity } = __nccwpck_require__(969)
-const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = __nccwpck_require__(3565)
+const { WORKFLOW_PULL_REQUEST } = __nccwpck_require__(3565)
 
 // Not online:
 // const reviewers = github.context.payload.pull_request.requested_reviewers.length
 
 const m2 = () => {
     return new Promise((resolve, reject) => {
-        const httpPullRequest = WORKFLOW_PULL_REQUEST === github.context.workflow
-                ? HttpHelper.getEventPullRequest()
-                : HttpHelper.getPullRequestById()
+        if (WORKFLOW_PULL_REQUEST === github.context.workflow) {
+            HttpHelper.getEventPullRequest()
+                .then(pullRequest => pullRequest.requested_reviewers.length)
+                .then(reviewers => {
+                    const m2_1 = evaluateReviewersQuantity(reviewers) * 0.65
+                    const m2_2 = 5 * 0.35; // Static
 
-        httpPullRequest
-            .then(pullRequest => pullRequest.requested_reviewers.length)
-            .then(reviewers => {
-                const m2_1 = evaluateReviewersQuantity(reviewers) * 0.65
-                const m2_2 = 5 * 0.35; // Static
-
-                resolve(m2_1 + m2_2)
-            })
+                    resolve(m2_1 + m2_2)
+                })
+        } else {
+            reject(new Error('Invalid workflow called'))
+        }
     })
 }
 
@@ -35363,28 +35336,21 @@ const core = __nccwpck_require__(5742)
 
 const { HttpHelper } = __nccwpck_require__(8682)
 const { evaluateLinesQuantity, evaluateTimeQuantity, getHoursDiff } = __nccwpck_require__(969)
-const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST } = __nccwpck_require__(3565)
+const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_CRON_JOB } = __nccwpck_require__(3565)
 
 const m3 = () => {
     return new Promise((resolve, reject) => {
-        if ([WORKFLOW_PULL_REQUEST, WORKFLOW_POST_PULL_REQUEST].includes(github.context.workflow)) {
-            const httpPullRequest = WORKFLOW_PULL_REQUEST === github.context.workflow
-                ? HttpHelper.getEventPullRequest()
-                : HttpHelper.getPullRequestById()
-            httpPullRequest
+        if (WORKFLOW_PULL_REQUEST === github.context.workflow) {
+            HttpHelper.getEventPullRequest()
                 .then(pullRequest => {
-                    // TODO: definir el m1.
-                    const m3_1 = evaluateTimeQuantity(getHoursDiff(pullRequest.created_at), core.getInput('m1') || 5) * 0.75;
+                    const m3_1 = evaluateTimeQuantity(getHoursDiff(pullRequest.created_at), core.getInput('m1', { required: true })) * 0.75;
                     const m3_2 = evaluateLinesQuantity(pullRequest.additions + pullRequest.deletions) * 0.25;
 
                     resolve(m3_1 + m3_2)
                 })
-        } else {
-            /**
-             * Workflow: WORKFLOW_PRE_PULL_REQUEST
-             */
+        } else if (WORKFLOW_PRE_PULL_REQUEST === github.context.workflow) {
             HttpHelper.getFilesByCompareBranch().then(files => {
-                const m3_1 = 5 * 0.75; // TODO: cron job
+                const m3_1 = 5 * 0.75;
 
                 let commitLinesQuantity = 0
 
@@ -35396,6 +35362,11 @@ const m3 = () => {
 
                 resolve(m3_1 + m3_2)
             })
+        } else if (WORKFLOW_CRON_JOB === github.context.workflow) {
+            // TODO: Implementar cron job to M3
+            reject(new Error('Do not implement M3 to cron job workflow'))
+        } else {
+            reject(new Error('Invalid workflow called'))
         }
     })
 }
@@ -35421,9 +35392,28 @@ module.exports = { m4 }
 const github = __nccwpck_require__(7318)
 const core = __nccwpck_require__(5742)
 
+const { getDaysDiff } = __nccwpck_require__(969)
+const { WORKFLOW_CRON_JOB, WORKFLOW_PULL_REQUEST } = __nccwpck_require__(3565)
+
 const m5 = () => {
     return new Promise((resolve, reject) => {
-        resolve(5)
+        if (WORKFLOW_PULL_REQUEST === github.context.workflow) {
+            HttpHelper.getEventPullRequest()
+                .then(pullRequest => {
+                    const days = getDaysDiff(pullRequest.created_at)
+
+                    if (days >= 7) {
+                        resolve(0)
+                    } else {
+                        resolve(5)
+                    }
+                })
+        } else if (WORKFLOW_CRON_JOB === github.context.workflow) {
+            // TODO: Implementar cron job to M3
+            reject(new Error('Do not implement M5 to cron job workflow'))
+        } else {
+            reject(new Error('Invalid workflow called'))
+        }
     });
 }
 
@@ -37373,7 +37363,7 @@ try {
         case 'm2': m2().then(value => metricValue = value); break
         case 'm3': m3().then(value => metricValue = value); break
         case 'm4': m4().then(value => metricValue = value); break
-        case 'm5': metricValue = m5(); break
+        case 'm5': m5().then(value => metricValue = value); break
         case 'total': metricValue = total(); break
     }
 

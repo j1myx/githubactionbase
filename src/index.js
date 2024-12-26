@@ -20,7 +20,7 @@ try {
         case 'm2': m2().then(value => metricValue = value); break
         case 'm3': m3().then(value => metricValue = value); break
         case 'm4': m4().then(value => metricValue = value); break
-        case 'm5': metricValue = m5(); break
+        case 'm5': m5().then(value => metricValue = value); break
         case 'total': metricValue = total(); break
     }
 
