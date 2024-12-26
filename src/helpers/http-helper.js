@@ -11,6 +11,11 @@ http.requestOptions = {
 }
 
 const HttpHelper = {
+    post: (path, data) => {
+        return http.post(path, JSON.stringify(data))
+            .then(response => response.readBody())
+            .then(body => JSON.parse(body))
+    },
     get: (path) => {
         return http.get(path)
             .then(response => response.readBody())
@@ -28,6 +33,10 @@ const HttpHelper = {
         return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
             '/compare/' + core.getInput('destination_branch', { required: true }) + '...' + github.context.ref)
             .then(response => response.files)
+    },
+    getPullRequests: () => {
+        return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
+            '/pulls')
     }
 }
 

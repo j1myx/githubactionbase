@@ -4,6 +4,7 @@ const core = require('@actions/core')
 const { HttpHelper } = require('./../helpers/http-helper')
 const { evaluateLinesQuantity, evaluateTimeQuantity, getHoursDiff } = require('./../helpers/calc-helper')
 const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_CRON_JOB } = require('./../constants/workflows.constant')
+const { BODY, ITEM } = require('./../constants/request.constant')
 
 const m3 = () => {
     return new Promise((resolve, reject) => {
@@ -30,8 +31,31 @@ const m3 = () => {
                 resolve(m3_1 + m3_2)
             })
         } else if (WORKFLOW_CRON_JOB === github.context.workflow) {
-            // TODO: Implementar cron job to M3
-            reject(new Error('Do not implement M3 to cron job workflow'))
+            HttpHelper.getPullRequests()
+                .then(prs => {
+                    const open_prs = prs.filter(pr => getHoursDiff(pr.created_at) >= 1)
+
+                    if (open_prs.length > 0) {
+                        let request = BODY
+                        const items = open_prs.map(pr => {
+                            let item = ITEM;
+                            item.title = pr.title;
+                            item.subtitle = (Math.floor(getHoursDiff(pr.created_at))) + ' hora(s)';
+                            item.tap.value = pr.html_url;
+
+                            return item;
+                        })
+
+                        request.attachments[0].content.items = items;
+
+                        HttpHelper.post(core.getInput('webhook_url'), request)
+                            .then();
+
+                        resolve(0)
+                    } else {
+                        resolve(5)
+                    }
+                })
         } else {
             reject(new Error('Invalid workflow called'))
         }

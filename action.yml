@@ -7,6 +7,8 @@ inputs:
   github_token:
     description: 'secrets.GITHUB_TOKEN'
     required: true
+  webhook_url:
+    description: Teams webhook url
   m0:
     description: 'M0'
   m1:

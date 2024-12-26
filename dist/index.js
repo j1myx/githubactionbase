@@ -34896,6 +34896,37 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 324:
+/***/ ((module) => {
+
+module.exports = {
+    BODY: {
+        "type": "message",
+        "attachments": [
+            {
+                "contentType": "application/vnd.microsoft.teams.card.list",
+                "content": {
+                    "title": "Pull Requests abiertos más de 1 día:",
+                    "items": [
+                    ]
+                }
+            }
+        ]
+    },
+    ITEM: {
+        "type": "resultItem",
+        "icon": "https://cdn-icons-png.flaticon.com/512/25/25231.png",
+        "title": "", // Test
+        "subtitle": "", // 1 día(s)
+        "tap": {
+            "type": "openUrl",
+            "value": "" // https://github.com/j1myx/githubactiontest/pull/1
+        }
+    }
+}
+
+/***/ }),
+
 /***/ 3565:
 /***/ ((module) => {
 
@@ -35108,6 +35139,11 @@ http.requestOptions = {
 }
 
 const HttpHelper = {
+    post: (path, data) => {
+        return http.post(path, JSON.stringify(data))
+            .then(response => response.readBody())
+            .then(body => JSON.parse(body))
+    },
     get: (path) => {
         return http.get(path)
             .then(response => response.readBody())
@@ -35125,6 +35161,10 @@ const HttpHelper = {
         return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
             '/compare/' + core.getInput('destination_branch', { required: true }) + '...' + github.context.ref)
             .then(response => response.files)
+    },
+    getPullRequests: () => {
+        return HttpHelper.get(github.context.apiUrl + '/repos/' + github.context.payload.repository.full_name +
+            '/pulls')
     }
 }
 
@@ -35337,6 +35377,7 @@ const core = __nccwpck_require__(5742)
 const { HttpHelper } = __nccwpck_require__(8682)
 const { evaluateLinesQuantity, evaluateTimeQuantity, getHoursDiff } = __nccwpck_require__(969)
 const { WORKFLOW_PRE_PULL_REQUEST, WORKFLOW_PULL_REQUEST, WORKFLOW_CRON_JOB } = __nccwpck_require__(3565)
+const { BODY, ITEM } = __nccwpck_require__(324)
 
 const m3 = () => {
     return new Promise((resolve, reject) => {
@@ -35363,8 +35404,31 @@ const m3 = () => {
                 resolve(m3_1 + m3_2)
             })
         } else if (WORKFLOW_CRON_JOB === github.context.workflow) {
-            // TODO: Implementar cron job to M3
-            reject(new Error('Do not implement M3 to cron job workflow'))
+            HttpHelper.getPullRequests()
+                .then(prs => {
+                    const open_prs = prs.filter(pr => getHoursDiff(pr.created_at) >= 1)
+
+                    if (open_prs.length > 0) {
+                        let request = BODY
+                        const items = open_prs.map(pr => {
+                            let item = ITEM;
+                            item.title = pr.title;
+                            item.subtitle = (Math.floor(getHoursDiff(pr.created_at))) + ' hora(s)';
+                            item.tap.value = pr.html_url;
+
+                            return item;
+                        })
+
+                        request.attachments[0].content.items = items;
+
+                        HttpHelper.post(core.getInput('webhook_url'), request)
+                            .then();
+
+                        resolve(0)
+                    } else {
+                        resolve(5)
+                    }
+                })
         } else {
             reject(new Error('Invalid workflow called'))
         }
@@ -35394,6 +35458,7 @@ const core = __nccwpck_require__(5742)
 
 const { getDaysDiff } = __nccwpck_require__(969)
 const { WORKFLOW_CRON_JOB, WORKFLOW_PULL_REQUEST } = __nccwpck_require__(3565)
+const { BODY, ITEM } = __nccwpck_require__(324)
 
 const m5 = () => {
     return new Promise((resolve, reject) => {
@@ -35409,8 +35474,31 @@ const m5 = () => {
                     }
                 })
         } else if (WORKFLOW_CRON_JOB === github.context.workflow) {
-            // TODO: Implementar cron job to M3
-            reject(new Error('Do not implement M5 to cron job workflow'))
+            HttpHelper.getPullRequests()
+                .then(prs => {
+                    const open_prs = prs.filter(pr => getDaysDiff(pr.created_at) >= 1)
+
+                    if (open_prs.length > 0) {
+                        let request = BODY
+                        const items = open_prs.map(pr => {
+                            let item = ITEM;
+                            item.title = pr.title;
+                            item.subtitle = (Math.floor(getDaysDiff(pr.created_at))) + ' día(s)';
+                            item.tap.value = pr.html_url;
+
+                            return item;
+                        })
+
+                        request.attachments[0].content.items = items;
+
+                        HttpHelper.post(core.getInput('webhook_url'), request)
+                            .then();
+
+                        resolve(0)
+                    } else {
+                        resolve(5)
+                    }
+                })
         } else {
             reject(new Error('Invalid workflow called'))
         }
